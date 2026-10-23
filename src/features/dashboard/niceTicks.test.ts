@@ -7,6 +7,10 @@ describe('niceTicks', () => {
     expect(niceTicks(380)).toEqual([0, 100, 200, 300, 400])
   })
 
+  it('keeps the top tick above the largest value', () => {
+    expect(niceTicks(400)).toEqual([0, 100, 200, 300, 400, 500])
+  })
+
   it('handles an empty history', () => {
     expect(niceTicks(0)).toEqual([0])
   })

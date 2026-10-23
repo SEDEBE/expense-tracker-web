@@ -1,23 +1,17 @@
-import { ChartPie, Plus, ReceiptText } from 'lucide-react'
-import { type ReactNode, useState } from 'react'
+import { Plus } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { MonthPicker } from '@/components/MonthPicker'
-import { Button, Card, EmptyState, Spinner } from '@/components/ui'
+import { Button, Card, EmptyState, Skeleton } from '@/components/ui'
 import { useCategories } from '@/features/categories/api'
 import { useExpenses, useHistory, useMonthlySummary } from '@/features/expenses/api'
 import { ExpenseFormModal } from '@/features/expenses/ExpenseFormModal'
-import { ExpenseRow } from '@/features/expenses/ExpenseRow'
-import {
-  daysInMonth,
-  formatMoney,
-  formatMonth,
-  formatPercent,
-  monthBounds,
-  shiftMonth,
-  toMonth,
-} from '@/lib/format'
+import { ExpenseTable } from '@/features/expenses/ExpenseTable'
+import { daysInMonth, formatMoney, formatMonth, monthBounds, shiftMonth, toMonth } from '@/lib/format'
+import type { Expense } from '@/lib/types'
 import { useToday } from '@/lib/useToday'
-import { CategoryBreakdown } from './CategoryBreakdown'
+import { CategoryBreakdown, CategoryLegend } from './CategoryBreakdown'
+import { findingFor, monthName } from './finding'
 import { HistoryChart } from './HistoryChart'
 
 export default function DashboardPage() {
@@ -26,148 +20,107 @@ export default function DashboardPage() {
   const currentMonth = toMonth(today)
   // The month lives in the URL (?mes=2026-09), so a reload or a shared link keeps it.
   const month = params.get('mes') ?? currentMonth
-  const isCurrentMonth = month === currentMonth
-  const setMonth = (value: string) =>
-    setParams(value === currentMonth ? {} : { mes: value }, { replace: true })
+  const inProgress = month === currentMonth
+  const setMonth = (value: string) => setParams(value === currentMonth ? {} : { mes: value }, { replace: true })
 
-  const [adding, setAdding] = useState(false)
+  const [editing, setEditing] = useState<Expense | 'new' | null>(null)
   const { data: categories = [] } = useCategories()
   const summary = useMonthlySummary(month)
   const previous = useMonthlySummary(shiftMonth(month, -1))
   const history = useHistory(6)
   const recent = useExpenses({ ...monthBounds(month), ordering: '-date' })
 
+  const days = inProgress ? today.getDate() : daysInMonth(month)
+  const count = summary.data?.by_category.reduce((sum, row) => sum + row.count, 0) ?? 0
+  const total = Number(summary.data?.total ?? 0)
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm text-muted">Resumen</p>
-          <h1 className="text-2xl font-semibold">{formatMonth(month)}</h1>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 pb-2">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-medium tracking-tight">{formatMonth(month)}</h1>
+          <p className="mt-1 text-muted">
+            {summary.data ? findingFor(summary.data, previous.data, inProgress) : 'Cargando el resumen…'}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MonthPicker value={month} onChange={setMonth} />
-          <Button onClick={() => setAdding(true)}>
+          <Button onClick={() => setEditing('new')}>
             <Plus className="size-4" aria-hidden />
             Añadir gasto
           </Button>
         </div>
       </div>
 
-      {summary.isPending ? (
-        <Spinner />
-      ) : summary.isError ? (
-        <Card>
-          <p className="text-danger">No se ha podido cargar el resumen: {summary.error.message}</p>
-        </Card>
-      ) : (
-        <>
-          <Stats
-            month={month}
-            isCurrentMonth={isCurrentMonth}
-            today={today}
-            total={Number(summary.data.total)}
-            previousTotal={previous.data ? Number(previous.data.total) : undefined}
-            count={summary.data.by_category.reduce((sum, row) => sum + row.count, 0)}
-            top={summary.data.by_category[0]}
-          />
-
-          <div className="grid gap-6 lg:grid-cols-5">
-            <Card className="lg:col-span-2">
-              <h2 className="mb-3 font-semibold">Por categoría</h2>
-              {summary.data.by_category.length ? (
-                <CategoryBreakdown summary={summary.data} />
-              ) : (
-                <EmptyState icon={<ChartPie className="size-5" />} title="Sin gastos este mes">
-                  Cuando añadas gastos verás aquí el reparto por categoría.
-                </EmptyState>
-              )}
-            </Card>
-
-            <Card className="flex flex-col lg:col-span-3">
-              <h2 className="mb-3 font-semibold">Últimos 6 meses</h2>
-              {history.data ? (
-                <HistoryChart data={history.data} selected={month} onSelect={setMonth} />
-              ) : (
-                <Spinner />
-              )}
-            </Card>
+      <div className="grid gap-4 lg:grid-cols-12">
+        <Card
+          className="lg:col-span-7"
+          title="Por categoría"
+          aside={<CategoryLegend month={monthName(month)} previousMonth={monthName(shiftMonth(month, -1))} />}
+        >
+          <div className="px-5 pt-3 pb-2">
+            <p className="text-sm text-muted">{inProgress ? 'Gastado hasta hoy' : 'Gastado'}</p>
+            {summary.data ? (
+              <>
+                <p className="num mt-0.5 text-[30px] leading-tight font-bold tracking-tight">{formatMoney(total)}</p>
+                <p className="num mt-1 text-sm text-muted">
+                  {count} {count === 1 ? 'gasto' : 'gastos'} · {formatMoney(total / days)} al día
+                  {inProgress ? ` · día ${days} de ${daysInMonth(month)}` : ''}
+                </p>
+              </>
+            ) : (
+              <div className="mt-1.5 space-y-2">
+                <Skeleton className="h-8 w-44" />
+                <Skeleton className="h-4 w-56" />
+              </div>
+            )}
           </div>
-        </>
-      )}
+          {summary.isError ? (
+            <p className="px-5 pb-5 text-negative">No se ha podido cargar el resumen. {summary.error.message}</p>
+          ) : summary.data?.by_category.length ? (
+            <CategoryBreakdown summary={summary.data} previous={previous.data} inProgress={inProgress} />
+          ) : summary.data ? (
+            <EmptyState title="Sin gastos este mes">Cuando añadas uno, aquí verás el reparto por categoría.</EmptyState>
+          ) : null}
+        </Card>
 
-      <Card>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="font-semibold">Últimos gastos</h2>
-          <Link
-            to={`/gastos${isCurrentMonth ? '' : `?mes=${month}`}`}
-            className="text-sm font-medium text-accent hover:underline"
-          >
+        <Card className="flex flex-col lg:col-span-5" title="Últimos 6 meses">
+          {history.data ? (
+            <HistoryChart data={history.data} selected={month} onSelect={setMonth} />
+          ) : (
+            <div className="px-5 py-4">
+              <Skeleton className="h-48 w-full" />
+            </div>
+          )}
+        </Card>
+      </div>
+
+      <Card
+        title="Últimos gastos"
+        aside={
+          <Link to={`/gastos${inProgress ? '' : `?mes=${month}`}`} className="text-sm text-text hover:underline">
             Ver todos
           </Link>
+        }
+      >
+        <div className="pt-2 pb-1">
+          {recent.data?.results.length ? (
+            <ExpenseTable expenses={recent.data.results.slice(0, 5)} categories={categories} onSelect={setEditing} />
+          ) : recent.isPending ? (
+            <div className="space-y-3 px-5 py-4">
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} className="h-5 w-full" />
+              ))}
+            </div>
+          ) : (
+            <EmptyState title="Todavía no hay gastos este mes" />
+          )}
         </div>
-        {recent.data?.results.length ? (
-          <ul className="divide-y divide-border">
-            {recent.data.results.slice(0, 5).map((expense) => (
-              <ExpenseRow key={expense.id} expense={expense} categories={categories} />
-            ))}
-          </ul>
-        ) : recent.isPending ? (
-          <Spinner />
-        ) : (
-          <EmptyState icon={<ReceiptText className="size-5" />} title="Todavía no hay gastos" />
-        )}
       </Card>
 
-      {adding && <ExpenseFormModal onClose={() => setAdding(false)} />}
+      {editing && (
+        <ExpenseFormModal expense={editing === 'new' ? undefined : editing} onClose={() => setEditing(null)} />
+      )}
     </div>
-  )
-}
-
-interface StatsProps {
-  month: string
-  isCurrentMonth: boolean
-  today: Date
-  total: number
-  previousTotal?: number
-  count: number
-  top?: { category: string | null; total: string }
-}
-
-function Stats({ month, isCurrentMonth, today, total, previousTotal, count, top }: StatsProps) {
-  const days = isCurrentMonth ? today.getDate() : daysInMonth(month)
-  const previousName = formatMonth(shiftMonth(month, -1)).split(' ')[0].toLowerCase()
-
-  // A month in progress always looks cheaper than a finished one, so only compare finished months.
-  let detail: ReactNode = `Día ${days} de ${daysInMonth(month)}`
-  if (!isCurrentMonth && previousTotal) {
-    const change = (total - previousTotal) / previousTotal
-    detail = `${formatPercent(change)} que en ${previousName}`
-  }
-
-  const share = top ? formatPercent(Number(top.total) / total).replace('+', '') : null
-  const items = [
-    { label: 'Total del mes', value: formatMoney(total), detail },
-    {
-      label: 'Media diaria',
-      value: formatMoney(total / days),
-      detail: isCurrentMonth ? `En ${days} días` : `${days} días`,
-    },
-    {
-      label: 'Gastos',
-      value: String(count),
-      detail: top ? `${top.category ?? 'Sin categoría'}: ${share} del total` : 'Ninguno todavía',
-    },
-  ]
-
-  return (
-    <dl className="grid rounded-lg border border-border bg-surface sm:grid-cols-3 sm:divide-x divide-y sm:divide-y-0 divide-border">
-      {items.map((item) => (
-        <div key={item.label} className="px-5 py-4">
-          <dt className="text-sm text-muted">{item.label}</dt>
-          <dd className="amount mt-1 text-2xl font-medium">{item.value}</dd>
-          <dd className="mt-1 text-sm text-muted">{item.detail}</dd>
-        </div>
-      ))}
-    </dl>
   )
 }
