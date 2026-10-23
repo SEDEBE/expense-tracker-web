@@ -16,8 +16,8 @@ describe('authentication', () => {
 
     await user.click(await screen.findByRole('button', { name: /entrar como demo/i }))
 
-    expect(await screen.findByText('Total del mes')).toBeInTheDocument()
-    expect(screen.getByText(/estás en una cuenta demo/i)).toBeInTheDocument()
+    expect(await screen.findByText(/^Gastado/)).toBeInTheDocument()
+    expect(screen.getByText(/datos de ejemplo/i)).toBeInTheDocument()
   })
 
   it('shows the API error when the credentials are wrong', async () => {
@@ -31,7 +31,7 @@ describe('authentication', () => {
     )
     const { user } = renderApp('/login', { loggedIn: false })
 
-    await user.type(await screen.findByLabelText('Email'), 'ana@example.com')
+    await user.type(await screen.findByLabelText('Email'), 'ana@example.com') // taste-skill-ignore: reserved test domain
     await user.type(screen.getByLabelText('Contraseña'), 'wrong-password')
     await user.click(screen.getByRole('button', { name: 'Entrar' }))
 
@@ -45,6 +45,12 @@ describe('authentication', () => {
 
     expect(await screen.findByText('Introduce un email válido')).toBeInTheDocument()
     expect(screen.getByText('Introduce tu contraseña')).toBeInTheDocument()
+  })
+
+  it('opens a demo account straight from /demo', async () => {
+    renderApp('/demo', { loggedIn: false })
+
+    expect(await screen.findByText(/^Gastado/)).toBeInTheDocument()
   })
 
   it('logs out', async () => {

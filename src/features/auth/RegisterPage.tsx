@@ -47,7 +47,7 @@ export function RegisterPage() {
 
   return (
     <AuthLayout>
-      <h2 className="text-2xl font-semibold">Crear cuenta</h2>
+      <h1 className="text-2xl font-medium tracking-tight">Crear cuenta</h1>
       <p className="mt-1 text-sm text-muted">Solo necesitas un email y una contraseña.</p>
 
       <form className="mt-8 space-y-4" onSubmit={onSubmit} noValidate>
@@ -57,7 +57,7 @@ export function RegisterPage() {
           {(props) => <Input autoComplete="given-name" {...props} {...register('first_name')} />}
         </Field>
         <Field label="Email" error={errors.email?.message}>
-          {(props) => <Input type="email" autoComplete="email" {...props} {...register('email')} />}
+          {(props) => <Input type="email" autoComplete="email" spellCheck={false} {...props} {...register('email')} />}
         </Field>
         <Field label="Contraseña" error={errors.password?.message} hint="Mínimo 8 caracteres.">
           {(props) => (
@@ -75,7 +75,7 @@ export function RegisterPage() {
 
       <p className="mt-6 text-center text-sm text-muted">
         ¿Ya tienes cuenta?{' '}
-        <Link to="/login" className="font-medium text-accent hover:underline">
+        <Link to="/login" className="font-medium text-text underline-offset-2 hover:underline">
           Entra
         </Link>
       </p>

@@ -28,7 +28,7 @@ export function LoginPage() {
 
   return (
     <AuthLayout>
-      <h2 className="text-2xl font-semibold">Entrar</h2>
+      <h1 className="text-2xl font-medium tracking-tight">Entrar</h1>
       <p className="mt-1 text-sm text-muted">
         ¿Solo quieres echar un vistazo? Entra con una cuenta de prueba.
       </p>
@@ -53,7 +53,7 @@ export function LoginPage() {
       <form className="space-y-4" onSubmit={handleSubmit((values) => login.mutate(values))} noValidate>
         {error && <Alert>{error.message}</Alert>}
         <Field label="Email" error={errors.email?.message}>
-          {(props) => <Input type="email" autoComplete="email" {...props} {...register('email')} />}
+          {(props) => <Input type="email" autoComplete="email" spellCheck={false} {...props} {...register('email')} />}
         </Field>
         <Field label="Contraseña" error={errors.password?.message}>
           {(props) => (
@@ -71,7 +71,7 @@ export function LoginPage() {
 
       <p className="mt-6 text-center text-sm text-muted">
         ¿No tienes cuenta?{' '}
-        <Link to="/registro" className="font-medium text-accent hover:underline">
+        <Link to="/registro" className="font-medium text-text underline-offset-2 hover:underline">
           Regístrate
         </Link>
       </p>
