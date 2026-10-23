@@ -5,42 +5,42 @@
 
 @custom-variant dark (@media (prefers-color-scheme: dark));
 
-/* Ledger look: cool grey-green paper, dark green ink, amounts in a monospaced face. */
+/* Ledger look: cool grey paper, blue ink, amounts in a monospaced face. */
 :root {
   color-scheme: light;
-  --c-page: #f3f5f2;
+  --c-page: #f6f7f9;
   --c-surface: #ffffff;
-  --c-surface-2: #eaede9;
-  --c-border: #d9ded8;
-  --c-text: #17201b;
-  --c-muted: #5a655e;
-  --c-accent: #1e6b4c;
-  --c-accent-strong: #15523a;
-  --c-accent-soft: #e1eee7;
+  --c-surface-2: #eef1f5;
+  --c-border: #e1e5eb;
+  --c-text: #0f1729;
+  --c-muted: #5b6474;
+  --c-accent: #2a78d6;
+  --c-accent-strong: #1c5cab;
+  --c-accent-soft: #e6f0fc;
   --c-on-accent: #ffffff;
-  --c-danger: #b42d2d;
-  --c-danger-soft: #fbeaea;
-  --c-chart: #1e6b4c;
-  --c-chart-muted: #b5d3c3;
+  --c-danger: #c53030;
+  --c-danger-soft: #fdecec;
+  --c-chart: #2a78d6;
+  --c-chart-muted: #b7d3f6;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --c-page: #0f1311;
-    --c-surface: #161b18;
-    --c-surface-2: #1d2420;
-    --c-border: #2a332e;
-    --c-text: #e4e9e6;
-    --c-muted: #98a49d;
-    --c-accent: #52b788;
-    --c-accent-strong: #84d0aa;
-    --c-accent-soft: #163024;
-    --c-on-accent: #0f1311;
-    --c-danger: #ee7b7b;
+    --c-page: #0d1117;
+    --c-surface: #161b22;
+    --c-surface-2: #1f2630;
+    --c-border: #2b333e;
+    --c-text: #e8ebf0;
+    --c-muted: #9aa4b2;
+    --c-accent: #3987e5;
+    --c-accent-strong: #6da7ec;
+    --c-accent-soft: #15263d;
+    --c-on-accent: #ffffff;
+    --c-danger: #f07171;
     --c-danger-soft: #3a1d1d;
-    --c-chart: #52b788;
-    --c-chart-muted: #2c4d3c;
+    --c-chart: #3987e5;
+    --c-chart-muted: #24466f;
   }
 }
 
