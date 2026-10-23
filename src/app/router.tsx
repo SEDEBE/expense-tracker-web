@@ -7,6 +7,7 @@ import { LoginPage } from '@/features/auth/LoginPage'
 import { RegisterPage } from '@/features/auth/RegisterPage'
 import { useIsLoggedIn } from '@/lib/session'
 import { AppLayout } from './AppLayout'
+import { type PageHandle, PageMeta } from './PageMeta'
 
 // Each page is its own chunk: the login screen loads without the dashboard code.
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage'))
@@ -25,22 +26,29 @@ function GuestOnly({ children }: { children: ReactNode }) {
   return useIsLoggedIn() ? <Navigate to="/" replace /> : children
 }
 
+const page = (title: string, index = false): PageHandle => ({ title, index })
+
 export const routes: RouteObject[] = [
-  { path: '/login', element: <GuestOnly><LoginPage /></GuestOnly> },
-  { path: '/registro', element: <GuestOnly><RegisterPage /></GuestOnly> },
-  { path: '/demo', element: <Page><DemoStartPage /></Page> },
-  { path: '/recuperar', element: <GuestOnly><Page><ForgotPasswordPage /></Page></GuestOnly> },
-  { path: '/restablecer', element: <GuestOnly><Page><ResetPasswordPage /></Page></GuestOnly> },
   {
-    element: <AppLayout />,
+    element: <PageMeta />,
     children: [
-      { index: true, element: <Page><DashboardPage /></Page> },
-      { path: 'gastos', element: <Page><ExpensesPage /></Page> },
-      { path: 'fijos', element: <Page><RecurringPage /></Page> },
-      { path: 'categorias', element: <Page><CategoriesPage /></Page> },
+      { path: '/login', handle: page('Entrar', true), element: <GuestOnly><LoginPage /></GuestOnly> },
+      { path: '/registro', handle: page('Crear cuenta', true), element: <GuestOnly><RegisterPage /></GuestOnly> },
+      { path: '/demo', handle: page('Probar la demo'), element: <Page><DemoStartPage /></Page> },
+      { path: '/recuperar', handle: page('Recuperar contraseña'), element: <GuestOnly><Page><ForgotPasswordPage /></Page></GuestOnly> },
+      { path: '/restablecer', handle: page('Nueva contraseña'), element: <GuestOnly><Page><ResetPasswordPage /></Page></GuestOnly> },
+      {
+        element: <AppLayout />,
+        children: [
+          { index: true, handle: page('Resumen'), element: <Page><DashboardPage /></Page> },
+          { path: 'gastos', handle: page('Gastos'), element: <Page><ExpensesPage /></Page> },
+          { path: 'fijos', handle: page('Gastos fijos'), element: <Page><RecurringPage /></Page> },
+          { path: 'categorias', handle: page('Categorías'), element: <Page><CategoriesPage /></Page> },
+        ],
+      },
+      { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
-  { path: '*', element: <Navigate to="/" replace /> },
 ]
 
 export const router = createBrowserRouter(routes)

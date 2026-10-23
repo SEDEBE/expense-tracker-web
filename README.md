@@ -104,6 +104,11 @@ against Vercel's Web Interface Guidelines.
   `VITE_SENTRY_DSN` reports unhandled errors to Sentry (the SDK is a separate chunk, so it costs
   nothing when disabled) and `VITE_UMAMI_URL` + `VITE_UMAMI_WEBSITE_ID` count visits with a
   self-hosted Umami, which uses no cookies and so needs no consent banner.
+- **SEO**: `index.html` carries the description, Open Graph image and a `WebApplication` JSON-LD;
+  each route declares a title and whether it may be indexed (`handle` in `router.tsx`, applied by
+  `PageMeta`): only `/login` and `/registro` are indexable, private pages are `noindex`.
+  `robots.txt` keeps crawlers out of `/demo` (every visit creates an account), and nginx answers
+  `404` for unknown paths while still serving the app, so no "soft 404s" get indexed.
 - **Errors in Spanish**: requests send `Accept-Language: es`, so the API's validation messages
   arrive translated and are shown next to each field.
 - **Tests render the whole app** with an in-memory router and MSW answering the API calls, and

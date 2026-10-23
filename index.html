@@ -2,15 +2,72 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Gestor de gastos personales: registra tus gastos por categoría y consulta resúmenes mensuales. Proyecto de portfolio con React y una API propia en Django." />
+    <title>Gastos · Gestor de gastos personales con presupuestos y gastos fijos</title>
+    <meta
+      name="description"
+      content="Gestor de gastos gratis: registra gastos por categoría, pon presupuestos con aviso por email, apunta gastos fijos solos y exporta a Excel. Pruébalo sin registrarte."
+    />
+    <meta name="author" content="Alejandro Córdoba" />
+    <!-- Each page sets its own robots value and canonical link (src/app/PageMeta.tsx). -->
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://gastos.alejandrocordoba.es/login" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2f4f7" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0b0c" />
-    <title>Gastos · Gestor de gastos personales</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Link previews (LinkedIn, WhatsApp, Slack...) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:site_name" content="Gastos" />
+    <meta property="og:url" content="https://gastos.alejandrocordoba.es/" />
+    <meta property="og:title" content="Gastos · Gestor de gastos personales" />
+    <meta property="og:description" content="Presupuestos con aviso por email, gastos fijos automáticos y exportación a Excel. Pruébalo sin registrarte." />
+    <meta property="og:image" content="https://gastos.alejandrocordoba.es/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Panel de Gastos: gasto del mes por categoría y los últimos seis meses" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "@id": "https://gastos.alejandrocordoba.es/#app",
+        "name": "Gastos, gestor de gastos personales",
+        "url": "https://gastos.alejandrocordoba.es/",
+        "image": "https://gastos.alejandrocordoba.es/og-image.png",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web",
+        "inLanguage": "es-ES",
+        "description": "Registra gastos por categoría, pon presupuestos con aviso por email al 80 % y al 100 %, apunta gastos fijos automáticamente, exporta a CSV y recibe un resumen mensual.",
+        "featureList": [
+          "Gastos por categoría y resumen mensual",
+          "Presupuestos con aviso por email",
+          "Gastos fijos que se apuntan solos",
+          "Exportación a CSV para Excel",
+          "Cuenta de demo sin registro"
+        ],
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+        "author": {
+          "@type": "Person",
+          "@id": "https://alejandrocordoba.es/#person",
+          "name": "Alejandro Córdoba",
+          "url": "https://alejandrocordoba.es/"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>Gastos, gestor de gastos personales</h1>
+      <p>
+        Registra tus gastos por categoría, pon presupuestos con aviso por email, apunta gastos fijos
+        automáticamente y exporta a CSV. Necesita JavaScript activado. Proyecto de
+        <a href="https://alejandrocordoba.es/">Alejandro Córdoba</a>.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

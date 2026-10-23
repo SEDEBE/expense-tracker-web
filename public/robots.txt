@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+# The API, the admin and the password pages have nothing to index.
+Disallow: /api/
+Disallow: /admin/
+Disallow: /recuperar
+Disallow: /restablecer
+# Every visit to /demo creates a demo account: crawlers must not open it.
+Disallow: /demo
+
+Sitemap: https://gastos.alejandrocordoba.es/sitemap.xml
