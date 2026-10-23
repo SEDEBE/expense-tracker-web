@@ -29,3 +29,9 @@ dist-ssr
 !.env.example
 !.env.production
 !.env.development
+
+# playwright-cli session files
+.playwright-cli/
+
+# taste-skill working files (direction sheet, inspector screenshots)
+.taste-skill/

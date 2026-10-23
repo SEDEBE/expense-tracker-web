@@ -1,85 +1,111 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/ibm-plex-sans';
-@import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/500.css';
+@import '@fontsource-variable/geist';
 
 @custom-variant dark (@media (prefers-color-scheme: dark));
 
-/* Ledger look: cool grey paper, blue ink, amounts in a monospaced face. */
+/*
+ * Achromatic ledger: the interface is ink on a blue-grey ground, money is set in ink, and the one
+ * blue goes on the main data (this month's column, this month's category bars). Everything else
+ * that is compared is grey.
+ */
 :root {
   color-scheme: light;
-  --c-page: #f6f7f9;
+  --c-ground: #f2f4f7;
   --c-surface: #ffffff;
-  --c-surface-2: #eef1f5;
-  --c-border: #e1e5eb;
-  --c-text: #0f1729;
-  --c-muted: #5b6474;
-  --c-accent: #2a78d6;
-  --c-accent-strong: #1c5cab;
-  --c-accent-soft: #e6f0fc;
-  --c-on-accent: #ffffff;
-  --c-danger: #c53030;
-  --c-danger-soft: #fdecec;
-  --c-chart: #2a78d6;
-  --c-chart-muted: #b7d3f6;
+  --c-raised: #f8f9fb;
+  --c-active: #e6e9ee;
+  --c-border: #e3e6eb;
+  --c-rule: #eef0f3;
+  --c-control: #d1d5db;
+  --c-text: #111111;
+  --c-muted: #5f6368;
+  --c-primary: #1d1f20;
+  --c-on-primary: #ffffff;
+  --c-secondary: #e5e7eb;
+  --c-chart: #1d5fbf;
+  --c-chart-muted: #c3c8d0;
+  --c-grid: #e5e7eb;
+  --c-positive: #247b50;
+  --c-negative: #c4242a;
+  --c-negative-soft: #ffedea;
+  --c-negative-ink: #831c1e;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --c-page: #0d1117;
-    --c-surface: #161b22;
-    --c-surface-2: #1f2630;
-    --c-border: #2b333e;
-    --c-text: #e8ebf0;
-    --c-muted: #9aa4b2;
-    --c-accent: #3987e5;
-    --c-accent-strong: #6da7ec;
-    --c-accent-soft: #15263d;
-    --c-on-accent: #ffffff;
-    --c-danger: #f07171;
-    --c-danger-soft: #3a1d1d;
-    --c-chart: #3987e5;
-    --c-chart-muted: #24466f;
+    --c-ground: #0b0b0c;
+    --c-surface: #141415;
+    --c-raised: #1b1b1d;
+    --c-active: #242427;
+    --c-border: #27272a;
+    --c-rule: #1f1f22;
+    --c-control: #3f3f46;
+    --c-text: #f4f4f5;
+    --c-muted: #b4b4b4;
+    --c-primary: #f4f4f5;
+    --c-on-primary: #111111;
+    --c-secondary: #27272a;
+    --c-chart: #5b9bf0;
+    --c-chart-muted: #3a3d43;
+    --c-grid: #26262a;
+    --c-positive: #3fc07a;
+    --c-negative: #e5566f;
+    --c-negative-soft: #2c1a20;
+    --c-negative-ink: #f2a3b0;
   }
 }
 
 @theme inline {
-  --font-sans: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-  --color-page: var(--c-page);
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --color-ground: var(--c-ground);
   --color-surface: var(--c-surface);
-  --color-surface-2: var(--c-surface-2);
+  --color-raised: var(--c-raised);
+  --color-active: var(--c-active);
   --color-border: var(--c-border);
+  --color-rule: var(--c-rule);
+  --color-control: var(--c-control);
   --color-text: var(--c-text);
   --color-muted: var(--c-muted);
-  --color-accent: var(--c-accent);
-  --color-accent-strong: var(--c-accent-strong);
-  --color-accent-soft: var(--c-accent-soft);
-  --color-on-accent: var(--c-on-accent);
-  --color-danger: var(--c-danger);
-  --color-danger-soft: var(--c-danger-soft);
+  --color-primary: var(--c-primary);
+  --color-on-primary: var(--c-on-primary);
+  --color-secondary: var(--c-secondary);
   --color-chart: var(--c-chart);
   --color-chart-muted: var(--c-chart-muted);
+  --color-grid: var(--c-grid);
+  --color-positive: var(--c-positive);
+  --color-negative: var(--c-negative);
+  --color-negative-soft: var(--c-negative-soft);
+  --color-negative-ink: var(--c-negative-ink);
+  --radius-card: 8px;
+  --radius-control: 6px;
 }
 
 @layer base {
+  html {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (pointer: fine) {
+    html {
+      overscroll-behavior: none;
+    }
+  }
   body {
-    @apply bg-page text-text font-sans antialiased;
+    @apply bg-ground text-text font-sans text-sm antialiased;
   }
   h1,
   h2 {
     text-wrap: balance;
   }
+  :focus-visible {
+    outline: 2px solid var(--c-chart);
+    outline-offset: 2px;
+  }
 }
 
-/* Money: monospaced, tabular digits so amounts line up in columns. */
-@utility amount {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-
-@utility tabular {
+/* Tabular figures on every amount, so columns of money line up digit for digit. */
+@utility num {
   font-variant-numeric: tabular-nums;
 }
 
@@ -88,6 +114,5 @@
   *::before,
   *::after {
     transition-duration: 0s !important;
-    animation-duration: 0s !important;
   }
 }

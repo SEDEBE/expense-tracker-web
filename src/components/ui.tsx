@@ -5,11 +5,12 @@ import { cx } from '@/lib/cx'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
+// The interface carries no colour: the primary action is near-black, the secondary a grey fill.
 const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-on-accent hover:bg-accent-strong',
-  secondary: 'bg-surface text-text border border-border hover:bg-surface-2',
-  ghost: 'text-muted hover:text-text hover:bg-surface-2',
-  danger: 'bg-danger text-surface hover:opacity-90',
+  primary: 'bg-primary text-on-primary hover:opacity-90',
+  secondary: 'bg-secondary text-text hover:bg-active',
+  ghost: 'text-muted hover:bg-active hover:text-text',
+  danger: 'bg-negative text-white hover:opacity-90',
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -33,12 +34,11 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       className={cx(
-        'inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-        'disabled:cursor-not-allowed disabled:opacity-60',
+        'inline-flex shrink-0 items-center justify-center gap-2 rounded-md font-medium transition-[background-color,opacity] active:opacity-80',
+        'disabled:cursor-not-allowed disabled:opacity-50',
         size === 'sm' && 'h-8 px-3 text-sm',
-        size === 'md' && 'h-10 px-4 text-sm',
-        size === 'lg' && 'h-12 px-5 text-base',
+        size === 'md' && 'h-9 px-3.5 text-sm',
+        size === 'lg' && 'h-11 px-4 text-[15px]',
         variants[variant],
         className,
       )}
@@ -50,17 +50,31 @@ export function Button({
   )
 }
 
-export function Card({ className, children }: { className?: string; children: ReactNode }) {
+interface CardProps {
+  className?: string
+  children: ReactNode
+  /** Card title shown in the header, with optional content on its right (a period, a legend, a link). */
+  title?: string
+  aside?: ReactNode
+}
+
+export function Card({ className, children, title, aside }: CardProps) {
   return (
-    <section className={cx('rounded-lg border border-border bg-surface p-5', className)}>
+    <section className={cx('rounded-lg border border-border bg-surface', className)}>
+      {title && (
+        <header className="flex items-baseline justify-between gap-4 px-5 pt-4">
+          <h2 className="text-base font-medium">{title}</h2>
+          {aside && <div className="text-xs text-muted">{aside}</div>}
+        </header>
+      )}
       {children}
     </section>
   )
 }
 
 const controlClasses =
-  'w-full rounded-md border border-border bg-surface px-3 h-10 text-sm text-text placeholder:text-muted ' +
-  'focus:outline-2 focus:outline-offset-0 focus:outline-accent aria-invalid:border-danger'
+  'w-full rounded-md border border-control bg-surface px-3 h-9 text-sm text-text placeholder:text-muted ' +
+  'focus:outline-2 focus:outline-offset-0 focus:outline-chart aria-invalid:border-negative'
 
 interface FieldProps {
   label: string
@@ -83,12 +97,12 @@ export function Field({ label, error, hint, children }: FieldProps) {
         'aria-describedby': error || hint ? messageId : undefined,
       })}
       {error ? (
-        <p id={messageId} className="text-sm text-danger">
+        <p id={messageId} className="text-sm text-negative">
           {error}
         </p>
       ) : (
         hint && (
-          <p id={messageId} className="text-sm text-muted">
+          <p id={messageId} className="text-xs text-muted">
             {hint}
           </p>
         )
@@ -127,35 +141,32 @@ export function Select({ className, ...props }: ComponentProps<'select'>) {
 
 export function Alert({ children }: { children: ReactNode }) {
   return (
-    <div role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
+    <div role="alert" className="rounded-md bg-negative-soft px-3 py-2 text-sm text-negative-ink">
       {children}
     </div>
   )
 }
 
+/** Loading placeholder that keeps the final layout: one grey bar per line, no shimmer. */
+export function Skeleton({ className }: { className?: string }) {
+  return <span aria-hidden className={cx('block rounded-sm bg-active', className)} />
+}
+
 export function Spinner({ label = 'Cargando…' }: { label?: string }) {
   return (
-    <div role="status" className="flex items-center justify-center gap-2 py-10 text-sm text-muted">
-      <LoaderCircle className="size-5 animate-spin" aria-hidden />
+    <div role="status" className="flex items-center gap-2 px-5 py-8 text-sm text-muted">
+      <LoaderCircle className="size-4 animate-spin" aria-hidden />
       {label}
     </div>
   )
 }
 
-export function EmptyState({
-  icon,
-  title,
-  children,
-}: {
-  icon: ReactNode
-  title: string
-  children?: ReactNode
-}) {
+/** An empty block keeps its frame: one sentence where the data would be. */
+export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 py-10 text-center">
-      <div className="text-muted">{icon}</div>
+    <div className="mx-5 my-4 rounded-lg border border-dashed border-control px-4 py-5 text-sm">
       <p className="font-medium">{title}</p>
-      {children && <div className="max-w-sm text-sm text-muted">{children}</div>}
+      {children && <div className="mt-1 text-muted">{children}</div>}
     </div>
   )
 }
