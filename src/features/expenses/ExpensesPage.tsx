@@ -1,16 +1,15 @@
-import { ChevronLeft, ChevronRight, Pencil, Plus, ReceiptText, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { MonthPicker } from '@/components/MonthPicker'
-import { Button, Card, EmptyState, Select, Spinner } from '@/components/ui'
+import { Button, Card, EmptyState, Select, Skeleton } from '@/components/ui'
 import { useCategories } from '@/features/categories/api'
-import { formatLongDate, formatMoney, monthBounds, toMonth } from '@/lib/format'
+import { formatMoney, formatMonth, monthBounds, toMonth } from '@/lib/format'
 import type { Expense } from '@/lib/types'
 import { useToday } from '@/lib/useToday'
-import { type ExpenseFilters, useDeleteExpense, useExpenses } from './api'
+import { type ExpenseFilters, useExpenses, useMonthlySummary } from './api'
 import { ExpenseFormModal } from './ExpenseFormModal'
-import { ExpenseRow } from './ExpenseRow'
+import { ExpenseTable } from './ExpenseTable'
 
 const PAGE_SIZE = 20 // The API's page size.
 
@@ -46,20 +45,25 @@ export default function ExpensesPage() {
 
   const { data: categories = [] } = useCategories()
   const expenses = useExpenses(filters)
-  const remove = useDeleteExpense()
+  const summary = useMonthlySummary(month)
   const [editing, setEditing] = useState<Expense | 'new' | null>(null)
-  const [deleting, setDeleting] = useState<Expense | null>(null)
 
-  const pages = expenses.data ? Math.max(1, Math.ceil(expenses.data.count / PAGE_SIZE)) : 1
+  // The total of what the filter shows comes from the monthly summary, computed by the API.
+  const categoryRow = summary.data?.by_category.find((row) =>
+    category === 'ninguna' ? row.category_id === null : String(row.category_id) === category,
+  )
+  const filteredTotal = category ? Number(categoryRow?.total ?? 0) : Number(summary.data?.total ?? 0)
+  const count = expenses.data?.count ?? 0
+  const pages = Math.max(1, Math.ceil(count / PAGE_SIZE))
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 pb-2">
         <div>
-          <h1 className="text-2xl font-semibold">Gastos</h1>
-          <p className="mt-1 text-muted">
-            {expenses.data
-              ? `${expenses.data.count} ${expenses.data.count === 1 ? 'gasto' : 'gastos'} en este periodo`
+          <h1 className="text-2xl font-medium tracking-tight">Gastos</h1>
+          <p className="num mt-1 text-muted">
+            {expenses.data && summary.data
+              ? `${count} ${count === 1 ? 'gasto' : 'gastos'} · ${formatMoney(filteredTotal)} en ${formatMonth(month).toLowerCase()}`
               : 'Cargando…'}
           </p>
         </div>
@@ -69,15 +73,10 @@ export default function ExpensesPage() {
         </Button>
       </div>
 
-      <Card className="p-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <MonthPicker value={month} onChange={(value) => update({ mes: value })} />
-          <div className="w-full sm:w-56">
-          <Select
-            aria-label="Categoría"
-            value={category}
-            onChange={(event) => update({ categoria: event.target.value })}
-          >
+      <div className="flex flex-wrap items-center gap-2">
+        <MonthPicker value={month} onChange={(value) => update({ mes: value })} />
+        <div className="w-full sm:w-52">
+          <Select aria-label="Categoría" value={category} onChange={(event) => update({ categoria: event.target.value })}>
             <option value="">Todas las categorías</option>
             <option value="ninguna">Sin categoría</option>
             {categories.map((item) => (
@@ -86,87 +85,51 @@ export default function ExpensesPage() {
               </option>
             ))}
           </Select>
-          </div>
-          <div className="w-full sm:w-56">
-          <Select
-            aria-label="Ordenar"
-            value={ordering}
-            onChange={(event) => update({ orden: event.target.value })}
-          >
+        </div>
+        <div className="w-full sm:w-52">
+          <Select aria-label="Ordenar" value={ordering} onChange={(event) => update({ orden: event.target.value })}>
             {orderings.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
           </Select>
-          </div>
         </div>
-      </Card>
+      </div>
 
-      <Card className="py-2">
+      <Card className="pt-2 pb-1">
         {expenses.isPending ? (
-          <Spinner />
+          <div className="space-y-4 px-5 py-4">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-5 w-full" />
+            ))}
+          </div>
         ) : expenses.isError ? (
-          <p className="py-6 text-center text-danger">{expenses.error.message}</p>
+          <p className="px-5 py-6 text-negative">No se han podido cargar los gastos. {expenses.error.message}</p>
         ) : expenses.data.results.length === 0 ? (
-          <EmptyState icon={<ReceiptText className="size-5" />} title="No hay gastos con estos filtros">
+          <EmptyState title="No hay gastos con estos filtros">
             Prueba con otro mes o categoría, o añade un gasto nuevo.
           </EmptyState>
         ) : (
-          <ul className={`divide-y divide-border ${expenses.isPlaceholderData ? 'opacity-60' : ''}`}>
-            {expenses.data.results.map((expense) => (
-              <ExpenseRow
-                key={expense.id}
-                expense={expense}
-                categories={categories}
-                actions={
-                  <div className="flex shrink-0 gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="px-2"
-                      onClick={() => setEditing(expense)}
-                      aria-label={`Editar ${expense.description || 'gasto'}`}
-                    >
-                      <Pencil className="size-4" aria-hidden />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="px-2 hover:text-danger"
-                      onClick={() => setDeleting(expense)}
-                      aria-label={`Borrar ${expense.description || 'gasto'}`}
-                    >
-                      <Trash2 className="size-4" aria-hidden />
-                    </Button>
-                  </div>
-                }
-              />
-            ))}
-          </ul>
+          <ExpenseTable
+            expenses={expenses.data.results}
+            categories={categories}
+            onSelect={setEditing}
+            stale={expenses.isPlaceholderData}
+          />
         )}
       </Card>
 
       {pages > 1 && (
-        <nav aria-label="Paginación" className="flex items-center justify-center gap-3 text-sm">
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={page <= 1}
-            onClick={() => update({ pagina: String(page - 1) })}
-          >
-            <ChevronLeft className="size-4" aria-hidden />
-            Anterior
-          </Button>
+        <nav aria-label="Paginación" className="flex items-center justify-end gap-3 text-sm">
           <span className="text-muted">
             Página {page} de {pages}
           </span>
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={page >= pages}
-            onClick={() => update({ pagina: String(page + 1) })}
-          >
+          <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => update({ pagina: String(page - 1) })}>
+            <ChevronLeft className="size-4" aria-hidden />
+            Anterior
+          </Button>
+          <Button variant="secondary" size="sm" disabled={page >= pages} onClick={() => update({ pagina: String(page + 1) })}>
             Siguiente
             <ChevronRight className="size-4" aria-hidden />
           </Button>
@@ -174,22 +137,7 @@ export default function ExpensesPage() {
       )}
 
       {editing && (
-        <ExpenseFormModal
-          expense={editing === 'new' ? undefined : editing}
-          onClose={() => setEditing(null)}
-        />
-      )}
-      {deleting && (
-        <ConfirmDialog
-          title="¿Borrar este gasto?"
-          confirmLabel="Borrar"
-          loading={remove.isPending}
-          onClose={() => setDeleting(null)}
-          onConfirm={() => remove.mutate(deleting.id, { onSuccess: () => setDeleting(null) })}
-        >
-          {deleting.description || 'Gasto sin descripción'} · {formatMoney(deleting.amount)} ·{' '}
-          {formatLongDate(deleting.date)}. No se puede deshacer.
-        </ConfirmDialog>
+        <ExpenseFormModal expense={editing === 'new' ? undefined : editing} onClose={() => setEditing(null)} />
       )}
     </div>
   )
