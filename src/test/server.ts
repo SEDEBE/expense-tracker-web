@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import type { Category, Expense, MonthlySummary, MonthTotal, Page, User } from '@/lib/types'
+import type { Category, Expense, MonthlySummary, MonthTotal, Page, RecurringExpense, User } from '@/lib/types'
 
 export const API = 'http://localhost/api/v1'
 
@@ -18,6 +18,31 @@ export const categories: Category[] = [
   { id: 1, name: 'Supermercado', monthly_budget: '300.00', created_at: '2026-10-01T00:00:00Z' },
   { id: 2, name: 'Vivienda', monthly_budget: '600.00', created_at: '2026-10-01T00:00:00Z' },
   { id: 3, name: 'Ocio', monthly_budget: null, created_at: '2026-10-01T00:00:00Z' },
+]
+
+export const recurring: RecurringExpense[] = [
+  {
+    id: 7,
+    amount: '650.00',
+    description: 'Alquiler',
+    category: 2,
+    day_of_month: 1,
+    active: true,
+    next_date: '2026-11-01',
+    last_date: '2026-10-01',
+    created_at: '2026-10-01T00:00:00Z',
+  },
+  {
+    id: 8,
+    amount: '13.99',
+    description: 'Netflix',
+    category: null,
+    day_of_month: 12,
+    active: false,
+    next_date: '2026-10-12',
+    last_date: null,
+    created_at: '2026-10-01T00:00:00Z',
+  },
 ]
 
 export const expenses: Expense[] = [
@@ -54,6 +79,7 @@ export const handlers = [
   http.get(`${API}/auth/me/`, () => HttpResponse.json(demoUser)),
   http.get(`${API}/categories/`, () => HttpResponse.json(page(categories))),
   http.get(`${API}/expenses/`, () => HttpResponse.json(page(expenses))),
+  http.get(`${API}/recurring/`, () => HttpResponse.json(page(recurring))),
   http.get(`${API}/expenses/summary/`, ({ request }) => {
     const month = new URL(request.url).searchParams.get('month') ?? '2026-10'
     const summary: MonthlySummary = {

@@ -12,6 +12,7 @@ import { AppLayout } from './AppLayout'
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage'))
 const ExpensesPage = lazy(() => import('@/features/expenses/ExpensesPage'))
 const CategoriesPage = lazy(() => import('@/features/categories/CategoriesPage'))
+const RecurringPage = lazy(() => import('@/features/recurring/RecurringPage'))
 const DemoStartPage = lazy(() => import('@/features/auth/DemoStartPage'))
 const ForgotPasswordPage = lazy(() => import('@/features/auth/ForgotPasswordPage'))
 const ResetPasswordPage = lazy(() => import('@/features/auth/ResetPasswordPage'))
@@ -35,6 +36,7 @@ export const routes: RouteObject[] = [
     children: [
       { index: true, element: <Page><DashboardPage /></Page> },
       { path: 'gastos', element: <Page><ExpensesPage /></Page> },
+      { path: 'fijos', element: <Page><RecurringPage /></Page> },
       { path: 'categorias', element: <Page><CategoriesPage /></Page> },
     ],
   },
