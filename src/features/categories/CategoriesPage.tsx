@@ -1,16 +1,23 @@
-import { Check, Pencil, Plus, Tags, Trash2, X } from 'lucide-react'
+import { Check, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { Alert, Button, Card, EmptyState, Input, Spinner } from '@/components/ui'
-import type { Category } from '@/lib/types'
+import { Alert, Button, Card, EmptyState, Input, Skeleton } from '@/components/ui'
+import { useMonthlySummary } from '@/features/expenses/api'
+import { formatMoney, formatMonth, toMonth } from '@/lib/format'
+import type { Category, CategoryTotal } from '@/lib/types'
+import { useToday } from '@/lib/useToday'
 import { useCategories, useCreateCategory, useDeleteCategory, useRenameCategory } from './api'
 
 export default function CategoriesPage() {
+  const month = toMonth(useToday())
   const categories = useCategories()
+  const summary = useMonthlySummary(month)
   const create = useCreateCategory()
   const remove = useDeleteCategory()
   const [name, setName] = useState('')
   const [deleting, setDeleting] = useState<Category | null>(null)
+
+  const totals = new Map(summary.data?.by_category.map((row) => [row.category_id, row]))
 
   const onCreate = (event: FormEvent) => {
     event.preventDefault()
@@ -19,48 +26,64 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Categorías</h1>
-        <p className="mt-1 text-muted">Al borrar una categoría, sus gastos pasan a «Sin categoría».</p>
+    <div className="space-y-4">
+      <div className="pb-2">
+        <h1 className="text-2xl font-medium tracking-tight">Categorías</h1>
+        <p className="mt-1 text-muted">
+          {categories.data
+            ? `${categories.data.length} ${categories.data.length === 1 ? 'categoría' : 'categorías'} · lo gastado en ${formatMonth(month).toLowerCase()}`
+            : 'Cargando…'}
+        </p>
       </div>
 
-      <Card>
-        <form onSubmit={onCreate} className="flex gap-2">
-          <Input
-            aria-label="Nombre de la nueva categoría"
-            placeholder="Nueva categoría, p. ej. Mascotas"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            maxLength={50}
-          />
-          <Button type="submit" loading={create.isPending} className="shrink-0">
-            <Plus className="size-4" aria-hidden />
-            Añadir
-          </Button>
-        </form>
-        {create.error && (
-          <div className="mt-3">
-            <Alert>{create.error.message}</Alert>
-          </div>
-        )}
-      </Card>
+      <form onSubmit={onCreate} className="flex max-w-xl gap-2">
+        <Input
+          aria-label="Nombre de la nueva categoría"
+          placeholder="Nueva categoría, p. ej. Mascotas…"
+          autoComplete="off"
+          name="name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          maxLength={50}
+        />
+        <Button type="submit" loading={create.isPending}>
+          <Plus className="size-4" aria-hidden />
+          Añadir
+        </Button>
+      </form>
+      {create.error && <Alert>{create.error.message}</Alert>}
 
-      <Card className="py-2">
+      <Card className="py-1">
         {categories.isPending ? (
-          <Spinner />
+          <div className="space-y-4 px-5 py-4">
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-5 w-full" />
+            ))}
+          </div>
         ) : categories.isError ? (
-          <p className="py-6 text-center text-danger">{categories.error.message}</p>
+          <p className="px-5 py-6 text-negative">No se han podido cargar las categorías. {categories.error.message}</p>
         ) : categories.data.length === 0 ? (
-          <EmptyState icon={<Tags className="size-5" />} title="Aún no tienes categorías">
-            Crea la primera con el formulario de arriba.
-          </EmptyState>
+          <EmptyState title="Aún no tienes categorías">Crea la primera con el campo de arriba.</EmptyState>
         ) : (
-          <ul className="divide-y divide-border">
-            {categories.data.map((category) => (
-              <CategoryItem key={category.id} category={category} onDelete={() => setDeleting(category)} />
+          <>
+          <div aria-hidden className={`hidden h-9 items-center gap-x-4 px-5 text-xs text-muted sm:grid ${columns}`}>
+            <span>Categoría</span>
+            <span className="text-right">Gastos este mes</span>
+            <span className="text-right">Importe este mes</span>
+            <span />
+          </div>
+          <ul>
+            {categories.data.map((category, index) => (
+              <CategoryItem
+                key={category.id}
+                category={category}
+                total={totals.get(category.id)}
+                first={index === 0}
+                onDelete={() => setDeleting(category)}
+              />
             ))}
           </ul>
+          </>
         )}
       </Card>
 
@@ -72,17 +95,28 @@ export default function CategoriesPage() {
           onClose={() => setDeleting(null)}
           onConfirm={() => remove.mutate(deleting.id, { onSuccess: () => setDeleting(null) })}
         >
-          Sus gastos no se borran: pasarán a «Sin categoría».
+          Sus gastos no se borran: pasan a «Sin categoría».
         </ConfirmDialog>
       )}
     </div>
   )
 }
 
-function CategoryItem({ category, onDelete }: { category: Category; onDelete: () => void }) {
+// Fixed columns so every amount ends on the same right edge.
+const columns = 'grid-cols-[minmax(0,1fr)_auto_auto] sm:grid-cols-[minmax(0,1fr)_9rem_9rem_5rem]'
+
+interface CategoryItemProps {
+  category: Category
+  total?: CategoryTotal
+  first: boolean
+  onDelete: () => void
+}
+
+function CategoryItem({ category, total, first, onDelete }: CategoryItemProps) {
   const rename = useRenameCategory()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(category.name)
+  const rowClass = `min-h-12 items-center gap-x-4 px-5 ${first ? '' : 'border-t border-rule'}`
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault()
@@ -92,8 +126,8 @@ function CategoryItem({ category, onDelete }: { category: Category; onDelete: ()
 
   if (editing) {
     return (
-      <li className="py-3">
-        <form onSubmit={onSubmit} className="flex items-center gap-2">
+      <li className={`${rowClass} flex flex-wrap py-2`}>
+        <form onSubmit={onSubmit} className="flex flex-1 items-center gap-2">
           <Input
             aria-label={`Nuevo nombre de ${category.name}`}
             value={name}
@@ -118,32 +152,30 @@ function CategoryItem({ category, onDelete }: { category: Category; onDelete: ()
             <X className="size-4" aria-hidden />
           </Button>
         </form>
-        {rename.error && <p className="mt-2 text-sm text-danger">{rename.error.message}</p>}
+        {rename.error && <p className="w-full text-sm text-negative">{rename.error.message}</p>}
       </li>
     )
   }
 
   return (
-    <li className="flex items-center gap-3 py-3">
-      <span className="flex-1 text-sm font-medium">{category.name}</span>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="px-2"
-        onClick={() => setEditing(true)}
-        aria-label={`Renombrar ${category.name}`}
-      >
-        <Pencil className="size-4" aria-hidden />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="px-2 hover:text-danger"
-        onClick={onDelete}
-        aria-label={`Borrar ${category.name}`}
-      >
-        <Trash2 className="size-4" aria-hidden />
-      </Button>
+    <li className={`${rowClass} grid ${columns}`}>
+      <span className="min-w-0 truncate">{category.name}</span>
+      <span className="num hidden text-right text-muted sm:block">{total?.count ?? 0}</span>
+      <span className={`num text-right ${total ? 'font-medium' : 'text-muted'}`}>{formatMoney(total?.total ?? 0)}</span>
+      <span className="flex justify-end gap-0.5">
+        <Button variant="ghost" size="sm" className="px-2" onClick={() => setEditing(true)} aria-label={`Renombrar ${category.name}`}>
+          <Pencil className="size-4" strokeWidth={1.5} aria-hidden />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="px-2 hover:text-negative"
+          onClick={onDelete}
+          aria-label={`Borrar ${category.name}`}
+        >
+          <Trash2 className="size-4" strokeWidth={1.5} aria-hidden />
+        </Button>
+      </span>
     </li>
   )
 }

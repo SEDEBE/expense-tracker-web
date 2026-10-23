@@ -13,8 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource-variable/ibm-plex-sans": "^5.3.0",
-    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource-variable/geist": "^5.3.0",
     "@hookform/resolvers": "^5.9.2",
     "@tanstack/react-query": "^5.104.5",
     "lucide-react": "^1.61.0",
@@ -22,10 +21,10 @@
     "react-dom": "^19.3.1",
     "react-hook-form": "^7.90.0",
     "react-router": "^8.5.0",
-    "recharts": "^3.10.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/cli": "^0.1.22",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",

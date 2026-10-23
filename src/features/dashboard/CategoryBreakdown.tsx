@@ -1,48 +1,93 @@
 import { Link } from 'react-router'
-import { formatMoney, formatPercent } from '@/lib/format'
+import { formatMoney } from '@/lib/format'
 import type { MonthlySummary } from '@/lib/types'
 
 interface CategoryBreakdownProps {
   summary: MonthlySummary
+  previous?: MonthlySummary
+  /** A month still in progress is compared with the whole previous month, so no signed change. */
+  inProgress: boolean
 }
 
-// One colour for every bar: the length already shows which category is bigger.
-export function CategoryBreakdown({ summary }: CategoryBreakdownProps) {
-  const total = Number(summary.total)
-  const max = Math.max(...summary.by_category.map((row) => Number(row.total)))
+interface Row {
+  key: string
+  categoryId: number | null
+  name: string
+  current: number
+  previous: number
+}
+
+function buildRows(summary: MonthlySummary, previous?: MonthlySummary): Row[] {
+  const before = new Map(previous?.by_category.map((row) => [row.category_id, Number(row.total)]))
+  return summary.by_category.map((row) => ({
+    key: String(row.category_id ?? 'none'),
+    categoryId: row.category_id,
+    name: row.category ?? 'Sin categoría',
+    current: Number(row.total),
+    previous: before.get(row.category_id) ?? 0,
+  }))
+}
+
+const signed = (value: number) => `${value > 0 ? '+' : value < 0 ? '−' : ''}${formatMoney(Math.abs(value))}`
+
+/**
+ * One row per category: this month as a blue bar, the previous month as a thin tick on the same
+ * scale. Spending more is the bad direction, so a rise is red and a fall is green.
+ */
+export function CategoryBreakdown({ summary, previous, inProgress }: CategoryBreakdownProps) {
+  const rows = buildRows(summary, previous)
+  const scale = Math.max(...rows.flatMap((row) => [row.current, row.previous]), 1)
 
   return (
-    <ul className="space-y-1">
-      {summary.by_category.map((row) => {
-        const amount = Number(row.total)
-        const query = new URLSearchParams({ mes: summary.month })
-        query.set('categoria', row.category_id === null ? 'ninguna' : String(row.category_id))
+    <ul className="px-3 pb-3">
+      {rows.map((row) => {
+        const query = new URLSearchParams({ mes: summary.month, categoria: row.categoryId === null ? 'ninguna' : String(row.categoryId) })
+        const change = row.current - row.previous
         return (
-          <li key={row.category_id ?? 'none'}>
+          <li key={row.key}>
             <Link
               to={`/gastos?${query}`}
-              className="block rounded-md px-2 py-2 hover:bg-surface-2"
-              title={`Ver los gastos de ${row.category ?? 'sin categoría'}`}
+              className="grid grid-cols-[minmax(0,7.5rem)_1fr_auto] items-center gap-x-4 rounded-md px-2 py-2 hover:bg-raised sm:grid-cols-[minmax(0,10rem)_1fr_auto]"
             >
-              <div className="flex items-baseline justify-between gap-3 text-sm">
-                <span className="truncate font-medium">{row.category ?? 'Sin categoría'}</span>
-                <span className="amount shrink-0">
-                  {formatMoney(amount)}
-                  <span className="ml-2 inline-block w-14 text-right text-muted">
-                    {formatPercent(amount / total).replace('+', '')}
-                  </span>
+              <span className="truncate">{row.name}</span>
+              <span className="relative h-2" aria-hidden>
+                <span className="absolute inset-y-0 left-0 rounded-r-sm bg-chart" style={{ width: `${(row.current / scale) * 100}%` }} />
+                {row.previous > 0 && (
+                  <span className="absolute -top-1 -bottom-1 w-px bg-text" style={{ left: `${(row.previous / scale) * 100}%` }} />
+                )}
+              </span>
+              <span className="num text-right">
+                <span className="block font-medium">{formatMoney(row.current)}</span>
+                <span className={inProgress || change === 0 ? 'block text-xs text-muted' : change > 0 ? 'block text-xs text-negative' : 'block text-xs text-positive'}>
+                  {inProgress
+                    ? row.previous > 0
+                      ? `de ${formatMoney(row.previous)}`
+                      : 'nueva'
+                    : row.previous > 0
+                      ? signed(change)
+                      : `${signed(change)} (nueva)`}
                 </span>
-              </div>
-              <div className="mt-1.5 h-1.5 bg-surface-2">
-                <div
-                  className="h-1.5 rounded-r-sm bg-chart"
-                  style={{ width: `${(amount / max) * 100}%` }}
-                />
-              </div>
+              </span>
             </Link>
           </li>
         )
       })}
     </ul>
+  )
+}
+
+/** The legend sits in the card header; each swatch is the mark it explains, scaled down. */
+export function CategoryLegend({ month, previousMonth }: { month: string; previousMonth: string }) {
+  return (
+    <span className="flex items-center gap-3">
+      <span className="flex items-center gap-1.5">
+        <span className="h-2 w-3 rounded-r-sm bg-chart" aria-hidden />
+        {month}
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="h-3 w-px bg-text" aria-hidden />
+        {previousMonth}
+      </span>
+    </span>
   )
 }

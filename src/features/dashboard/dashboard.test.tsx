@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { renderApp } from '@/test/renderApp'
 
@@ -6,9 +6,9 @@ describe('dashboard', () => {
   it('shows the month total and the breakdown by category', async () => {
     renderApp('/')
 
-    const tile = (await screen.findByText('Total del mes')).parentElement!
-    expect(tile).toHaveTextContent(/692,30/)
-    const breakdown = screen.getByRole('heading', { name: 'Por categoría' }).parentElement!
+    const card = (await screen.findByText(/^Gastado/)).closest('section')!
+    await waitFor(() => expect(card).toHaveTextContent(/692,30/))
+    const breakdown = screen.getByRole('heading', { name: 'Por categoría' }).closest('section')!
     const links = within(breakdown).getAllByRole('link')
     expect(links.map((link) => link.textContent)).toEqual([
       expect.stringContaining('Vivienda'),

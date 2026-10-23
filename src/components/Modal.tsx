@@ -38,7 +38,7 @@ export function Modal({ title, onClose, children }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center overscroll-contain bg-black/40 p-4 sm:items-center"
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
       <div
@@ -46,17 +46,17 @@ export function Modal({ title, onClose, children }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-md rounded-lg border border-border bg-surface p-6 shadow-xl"
+        className="w-full max-w-md rounded-lg border border-border bg-surface p-6 shadow-[0_12px_32px_rgba(0,0,0,0.18)]" // taste-skill-ignore: a dialog floats
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 id={titleId} className="text-lg font-semibold">
+          <h2 id={titleId} className="text-base font-medium">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-text"
+            className="rounded-md p-1 text-muted hover:bg-active hover:text-text"
             tabIndex={-1}
           >
             <X className="size-5" aria-hidden />

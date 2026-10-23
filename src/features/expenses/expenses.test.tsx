@@ -36,7 +36,7 @@ describe('expenses page', () => {
     expect(await screen.findByText('Introduce un importe como 12,50')).toBeInTheDocument()
   })
 
-  it('asks before deleting an expense', async () => {
+  it('asks for a second click before deleting an expense', async () => {
     let deleted = false
     server.use(
       http.delete(`${API}/expenses/10/`, () => {
@@ -46,9 +46,11 @@ describe('expenses page', () => {
     )
     const { user } = renderApp('/gastos')
 
-    await user.click(await screen.findByRole('button', { name: 'Borrar Alquiler' }))
-    expect(screen.getByRole('dialog', { name: '¿Borrar este gasto?' })).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Borrar' }))
+    await user.click(await screen.findByRole('button', { name: /editar alquiler/i }))
+    const dialog = within(screen.getByRole('dialog', { name: 'Editar gasto' }))
+    await user.click(dialog.getByRole('button', { name: 'Borrar' }))
+    expect(deleted).toBe(false)
+    await user.click(dialog.getByRole('button', { name: 'Sí, borrar' }))
 
     await waitFor(() => expect(deleted).toBe(true))
   })

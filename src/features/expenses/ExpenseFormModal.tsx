@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Modal } from '@/components/Modal'
@@ -8,7 +9,7 @@ import { ApiError } from '@/lib/api'
 import { toIsoDate } from '@/lib/format'
 import type { Expense } from '@/lib/types'
 import { useToday } from '@/lib/useToday'
-import { useSaveExpense } from './api'
+import { useDeleteExpense, useSaveExpense } from './api'
 
 const schema = z.object({
   // Spanish keyboards type "12,50"; the API wants "12.50".
@@ -40,6 +41,9 @@ export function ExpenseFormModal({ expense, onClose }: ExpenseFormModalProps) {
   const today = useToday()
   const { data: categories = [] } = useCategories()
   const save = useSaveExpense()
+  const remove = useDeleteExpense()
+  // Deleting takes two clicks: the first one turns the button into the confirmation.
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const {
     register,
     handleSubmit,
@@ -81,7 +85,7 @@ export function ExpenseFormModal({ expense, onClose }: ExpenseFormModalProps) {
         <div className="grid grid-cols-2 gap-4">
           <Field label="Importe (€)" error={errors.amount?.message}>
             {(props) => (
-              <Input inputMode="decimal" placeholder="12,50" {...props} {...register('amount')} />
+              <Input inputMode="decimal" autoComplete="off" placeholder="12,50" {...props} {...register('amount')} />
             )}
           </Field>
           <Field label="Fecha" error={errors.date?.message}>
@@ -89,7 +93,7 @@ export function ExpenseFormModal({ expense, onClose }: ExpenseFormModalProps) {
           </Field>
         </div>
         <Field label="Descripción" error={errors.description?.message}>
-          {(props) => <Input placeholder="Ej.: Compra semanal" {...props} {...register('description')} />}
+          {(props) => <Input autoComplete="off" placeholder="Compra semanal…" {...props} {...register('description')} />}
         </Field>
         <Field label="Categoría" error={errors.category?.message}>
           {(props) => (
@@ -103,7 +107,21 @@ export function ExpenseFormModal({ expense, onClose }: ExpenseFormModalProps) {
             </Select>
           )}
         </Field>
-        <div className="flex justify-end gap-2 pt-2">
+        {remove.error && <Alert>{remove.error.message}</Alert>}
+        <div className="flex items-center gap-2 pt-2">
+          {expense && (
+            <Button
+              variant={confirmDelete ? 'danger' : 'ghost'}
+              className={confirmDelete ? '' : 'text-negative hover:text-negative'}
+              loading={remove.isPending}
+              onClick={() =>
+                confirmDelete ? remove.mutate(expense.id, { onSuccess: onClose }) : setConfirmDelete(true)
+              }
+            >
+              {confirmDelete ? 'Sí, borrar' : 'Borrar'}
+            </Button>
+          )}
+          <span className="flex-1" />
           <Button variant="ghost" onClick={onClose}>
             Cancelar
           </Button>

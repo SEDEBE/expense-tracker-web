@@ -8,10 +8,11 @@ import { RegisterPage } from '@/features/auth/RegisterPage'
 import { useIsLoggedIn } from '@/lib/session'
 import { AppLayout } from './AppLayout'
 
-// Each page is its own chunk: the login screen loads without the charts library.
+// Each page is its own chunk: the login screen loads without the dashboard code.
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage'))
 const ExpensesPage = lazy(() => import('@/features/expenses/ExpensesPage'))
 const CategoriesPage = lazy(() => import('@/features/categories/CategoriesPage'))
+const DemoStartPage = lazy(() => import('@/features/auth/DemoStartPage'))
 
 function Page({ children }: { children: ReactNode }) {
   return <Suspense fallback={<Spinner />}>{children}</Suspense>
@@ -24,6 +25,7 @@ function GuestOnly({ children }: { children: ReactNode }) {
 export const routes: RouteObject[] = [
   { path: '/login', element: <GuestOnly><LoginPage /></GuestOnly> },
   { path: '/registro', element: <GuestOnly><RegisterPage /></GuestOnly> },
+  { path: '/demo', element: <Page><DemoStartPage /></Page> },
   {
     element: <AppLayout />,
     children: [

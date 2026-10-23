@@ -10,17 +10,13 @@ interface MonthPickerProps {
 // Stops at the current month: there are no future expenses to look at.
 export function MonthPicker({ value, onChange }: MonthPickerProps) {
   const current = toMonth(useToday())
+  const button = 'flex h-full w-8 items-center justify-center text-muted hover:bg-active hover:text-text disabled:opacity-30 disabled:hover:bg-transparent'
   return (
-    <div className="inline-flex items-center rounded-md border border-border bg-surface">
-      <button
-        type="button"
-        onClick={() => onChange(shiftMonth(value, -1))}
-        aria-label="Mes anterior"
-        className="rounded-l-md p-2 text-muted hover:bg-surface-2 hover:text-text"
-      >
+    <div className="inline-flex h-9 items-center overflow-hidden rounded-md border border-control bg-surface">
+      <button type="button" onClick={() => onChange(shiftMonth(value, -1))} aria-label="Mes anterior" className={button}>
         <ChevronLeft className="size-4" aria-hidden />
       </button>
-      <span className="min-w-36 px-2 text-center text-sm font-medium" aria-live="polite">
+      <span className="min-w-34 px-1 text-center text-sm font-medium" aria-live="polite">
         {formatMonth(value)}
       </span>
       <button
@@ -28,7 +24,7 @@ export function MonthPicker({ value, onChange }: MonthPickerProps) {
         onClick={() => onChange(shiftMonth(value, 1))}
         disabled={value >= current}
         aria-label="Mes siguiente"
-        className="rounded-r-md p-2 text-muted hover:bg-surface-2 hover:text-text disabled:opacity-30 disabled:hover:bg-transparent"
+        className={button}
       >
         <ChevronRight className="size-4" aria-hidden />
       </button>
