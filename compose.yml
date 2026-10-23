@@ -1,0 +1,11 @@
+# Serves the built app on http://localhost:8080 and forwards /api to the API running on the host
+# (`docker compose up` in expense-tracker-api, which listens on :8000).
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      API_UPSTREAM: http://host.docker.internal:8000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
