@@ -40,6 +40,21 @@ export interface ExpenseInput {
   category: number | null
 }
 
+export interface RecurringExpense {
+  id: number
+  amount: string
+  description: string
+  category: number | null
+  /** 1-31; in shorter months the API uses the last day. */
+  day_of_month: number
+  active: boolean
+  next_date: string
+  last_date: string | null
+  created_at: string
+}
+
+export type RecurringExpenseInput = Pick<RecurringExpense, 'amount' | 'description' | 'category' | 'day_of_month' | 'active'>
+
 export interface Page<T> {
   count: number
   next: string | null

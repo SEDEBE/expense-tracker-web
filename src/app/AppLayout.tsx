@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, Menu, ReceiptText, Tags, X } from 'lucide-react'
+import { LayoutDashboard, LogOut, Menu, ReceiptText, Repeat, Tags, X } from 'lucide-react'
 import { useState } from 'react'
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router'
 import { Mark } from '@/components/Mark'
@@ -9,6 +9,7 @@ import { useIsLoggedIn } from '@/lib/session'
 const links = [
   { to: '/', label: 'Resumen', icon: LayoutDashboard, end: true },
   { to: '/gastos', label: 'Gastos', icon: ReceiptText, end: false },
+  { to: '/fijos', label: 'Gastos fijos', icon: Repeat, end: false },
   { to: '/categorias', label: 'Categorías', icon: Tags, end: false },
 ]
 
