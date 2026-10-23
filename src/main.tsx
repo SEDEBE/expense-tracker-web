@@ -5,6 +5,10 @@ import { RouterProvider } from 'react-router/dom'
 import { createQueryClient } from './app/queryClient'
 import { router } from './app/router'
 import './index.css'
+import { startErrorTracking, startVisitStatistics } from './lib/monitoring'
+
+startErrorTracking()
+startVisitStatistics()
 
 const queryClient = createQueryClient()
 

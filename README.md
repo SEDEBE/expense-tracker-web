@@ -93,6 +93,10 @@ against Vercel's Web Interface Guidelines.
   the app sends it to `POST /api/v1/auth/google/`, which verifies it and returns the usual JWT
   pair. The button only appears when `VITE_GOOGLE_CLIENT_ID` is set (`.env.local` in
   development, `.env.production` for builds); the client ID is public, not a secret.
+- **Monitoring** (`src/lib/monitoring.ts`), both off unless their variables are set at build time:
+  `VITE_SENTRY_DSN` reports unhandled errors to Sentry (the SDK is a separate chunk, so it costs
+  nothing when disabled) and `VITE_UMAMI_URL` + `VITE_UMAMI_WEBSITE_ID` count visits with a
+  self-hosted Umami, which uses no cookies and so needs no consent banner.
 - **Errors in Spanish**: requests send `Accept-Language: es`, so the API's validation messages
   arrive translated and are shown next to each field.
 - **Tests render the whole app** with an in-memory router and MSW answering the API calls, and
