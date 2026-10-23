@@ -17,7 +17,6 @@ function Page({ children }: { children: ReactNode }) {
   return <Suspense fallback={<Spinner />}>{children}</Suspense>
 }
 
-/** Login and register are only for visitors; with a session they open the dashboard. */
 function GuestOnly({ children }: { children: ReactNode }) {
   return useIsLoggedIn() ? <Navigate to="/" replace /> : children
 }

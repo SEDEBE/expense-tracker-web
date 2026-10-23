@@ -25,7 +25,6 @@ export function useExpenses(filters: ExpenseFilters) {
   return useQuery({
     queryKey: ['expenses', filters],
     queryFn: () => expensesApi.list(filters),
-    // Keep showing the current page while the next one loads, instead of flashing a spinner.
     placeholderData: keepPreviousData,
   })
 }

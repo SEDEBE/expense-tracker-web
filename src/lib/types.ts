@@ -1,5 +1,4 @@
-// Shapes returned by the Django API (see /api/docs/ on the backend).
-// Amounts come as strings to keep decimal precision; convert them only to display or chart them.
+// Amounts come as strings from the API to keep decimal precision.
 
 export interface User {
   id: number

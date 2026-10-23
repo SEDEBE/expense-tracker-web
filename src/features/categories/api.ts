@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import type { Category, Page } from '@/lib/types'
 
-/** Every category of the user. The API paginates, so follow the pages until the last one. */
+// The endpoint is paginated; follow `next` until the last page.
 async function listAll(): Promise<Category[]> {
   const categories: Category[] = []
   for (let page = 1; ; page++) {

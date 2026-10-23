@@ -21,8 +21,8 @@ export default function CategoriesPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Categorías</h1>
-        <p className="mt-1 text-muted">Agrupa tus gastos para ver en qué se va tu dinero.</p>
+        <h1 className="text-2xl font-semibold">Categorías</h1>
+        <p className="mt-1 text-muted">Al borrar una categoría, sus gastos pasan a «Sin categoría».</p>
       </div>
 
       <Card>

@@ -6,7 +6,7 @@ describe('dashboard', () => {
   it('shows the month total and the breakdown by category', async () => {
     renderApp('/')
 
-    const tile = (await screen.findByText('Total del mes')).closest('section')!
+    const tile = (await screen.findByText('Total del mes')).parentElement!
     expect(tile).toHaveTextContent(/692,30/)
     const breakdown = screen.getByRole('heading', { name: 'Por categoría' }).parentElement!
     const links = within(breakdown).getAllByRole('link')

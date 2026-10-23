@@ -7,16 +7,16 @@ interface MonthPickerProps {
   onChange: (month: string) => void
 }
 
-/** "‹ Octubre de 2026 ›". It stops at the current month: there are no future expenses to see. */
+// Stops at the current month: there are no future expenses to look at.
 export function MonthPicker({ value, onChange }: MonthPickerProps) {
   const current = toMonth(useToday())
   return (
-    <div className="inline-flex items-center rounded-lg border border-border bg-surface shadow-sm">
+    <div className="inline-flex items-center rounded-md border border-border bg-surface">
       <button
         type="button"
         onClick={() => onChange(shiftMonth(value, -1))}
         aria-label="Mes anterior"
-        className="rounded-l-lg p-2 text-muted hover:bg-surface-2 hover:text-text"
+        className="rounded-l-md p-2 text-muted hover:bg-surface-2 hover:text-text"
       >
         <ChevronLeft className="size-4" aria-hidden />
       </button>
@@ -28,7 +28,7 @@ export function MonthPicker({ value, onChange }: MonthPickerProps) {
         onClick={() => onChange(shiftMonth(value, 1))}
         disabled={value >= current}
         aria-label="Mes siguiente"
-        className="rounded-r-lg p-2 text-muted hover:bg-surface-2 hover:text-text disabled:opacity-30 disabled:hover:bg-transparent"
+        className="rounded-r-md p-2 text-muted hover:bg-surface-2 hover:text-text disabled:opacity-30 disabled:hover:bg-transparent"
       >
         <ChevronRight className="size-4" aria-hidden />
       </button>

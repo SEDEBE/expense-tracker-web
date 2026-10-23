@@ -6,7 +6,6 @@ import { niceTicks } from './niceTicks'
 
 interface HistoryChartProps {
   data: MonthTotal[]
-  /** Month highlighted in the chart; the others are shown lighter. */
   selected: string
   onSelect: (month: string) => void
 }
@@ -22,14 +21,13 @@ function ChartTooltip({ active, payload }: TooltipContentProps) {
   const row = payload?.[0]?.payload as (MonthTotal & { value: number }) | undefined
   if (!active || !row) return null
   return (
-    <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm shadow-lg">
+    <div className="rounded-md border border-border bg-surface px-3 py-2 text-sm shadow-md">
       <p className="text-muted">{formatMonth(row.month)}</p>
-      <p className="tabular font-semibold">{formatMoney(row.total)}</p>
+      <p className="amount font-medium">{formatMoney(row.total)}</p>
     </div>
   )
 }
 
-/** Monthly totals as columns. Clicking a column opens that month in the dashboard. */
 export function HistoryChart({ data, selected, onSelect }: HistoryChartProps) {
   const rows = data.map((row) => ({ ...row, value: Number(row.total) }))
   const ticks = niceTicks(Math.max(...rows.map((row) => row.value)))
@@ -65,7 +63,7 @@ export function HistoryChart({ data, selected, onSelect }: HistoryChartProps) {
               shape={(props: BarShapeProps) => (
                 <Rectangle
                   {...props}
-                  radius={[4, 4, 0, 0]}
+                  radius={[2, 2, 0, 0]}
                   style={{
                     fill:
                       (props.payload as MonthTotal).month === selected
@@ -79,7 +77,7 @@ export function HistoryChart({ data, selected, onSelect }: HistoryChartProps) {
         </ResponsiveContainer>
       </div>
 
-      {/* The same data as a table, for screen readers. */}
+      {/* Same data as a table for screen readers. */}
       <table className="sr-only">
         <caption>Total gastado por mes</caption>
         <thead>

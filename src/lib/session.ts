@@ -39,7 +39,7 @@ export const session = {
     try {
       localStorage.removeItem(KEY)
     } catch {
-      // Nothing to remove.
+      // ignore: storage unavailable
     }
     emit()
   },
@@ -49,7 +49,6 @@ export const session = {
   },
 }
 
-/** True while there is a token pair; components re-render when you log in or out. */
 export function useIsLoggedIn() {
   return useSyncExternalStore(session.subscribe, () => session.get() !== null)
 }

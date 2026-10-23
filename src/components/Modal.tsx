@@ -8,13 +8,12 @@ interface ModalProps {
   children: ReactNode
 }
 
-/** Centered dialog. Closes with Escape or a click outside, and focuses its first field. */
 export function Modal({ title, onClose, children }: ModalProps) {
   const titleId = useId()
   const panel = useRef<HTMLDivElement>(null)
 
-  // Keep the latest onClose without re-running the effect: parents often pass a new arrow
-  // function on every render, and re-running would steal the focus while you type.
+  // Parents pass a new onClose on every render; a ref avoids re-running the effect
+  // (and stealing focus) each time.
   const onCloseRef = useRef(onClose)
   useEffect(() => {
     onCloseRef.current = onClose
@@ -29,7 +28,6 @@ export function Modal({ title, onClose, children }: ModalProps) {
       'input, select, textarea, button:not([tabindex="-1"])',
     )
     first?.focus()
-    // Stop the page behind from scrolling while the dialog is open.
     const overflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
@@ -48,7 +46,7 @@ export function Modal({ title, onClose, children }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl"
+        className="w-full max-w-md rounded-lg border border-border bg-surface p-6 shadow-xl"
       >
         <div className="mb-5 flex items-center justify-between">
           <h2 id={titleId} className="text-lg font-semibold">

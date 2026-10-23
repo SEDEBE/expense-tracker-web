@@ -6,10 +6,7 @@ interface CategoryBreakdownProps {
   summary: MonthlySummary
 }
 
-/**
- * One horizontal bar per category, longest first. A single color: the bar length already says
- * which category is bigger, so a color per category would add noise, not information.
- */
+// One colour for every bar: the length already shows which category is bigger.
 export function CategoryBreakdown({ summary }: CategoryBreakdownProps) {
   const total = Number(summary.total)
   const max = Math.max(...summary.by_category.map((row) => Number(row.total)))
@@ -24,21 +21,21 @@ export function CategoryBreakdown({ summary }: CategoryBreakdownProps) {
           <li key={row.category_id ?? 'none'}>
             <Link
               to={`/gastos?${query}`}
-              className="group block rounded-lg px-2 py-2 hover:bg-surface-2"
+              className="block rounded-md px-2 py-2 hover:bg-surface-2"
               title={`Ver los gastos de ${row.category ?? 'sin categoría'}`}
             >
               <div className="flex items-baseline justify-between gap-3 text-sm">
                 <span className="truncate font-medium">{row.category ?? 'Sin categoría'}</span>
-                <span className="tabular shrink-0">
+                <span className="amount shrink-0">
                   {formatMoney(amount)}
                   <span className="ml-2 inline-block w-14 text-right text-muted">
                     {formatPercent(amount / total).replace('+', '')}
                   </span>
                 </span>
               </div>
-              <div className="mt-1.5 h-2 rounded-full bg-surface-2">
+              <div className="mt-1.5 h-1.5 bg-surface-2">
                 <div
-                  className="h-2 rounded-full bg-chart transition-[width] duration-500"
+                  className="h-1.5 rounded-r-sm bg-chart"
                   style={{ width: `${(amount / max) * 100}%` }}
                 />
               </div>

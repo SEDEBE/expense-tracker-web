@@ -1,5 +1,3 @@
-// Spanish formatting for amounts and dates: 1.234,50 €, "octubre de 2026", "23 oct".
-
 const currency = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' })
 const percent = new Intl.NumberFormat('es-ES', {
   style: 'percent',
@@ -19,7 +17,6 @@ export function formatPercent(ratio: number) {
   return percent.format(ratio)
 }
 
-/** "2026-10" → Date for the 1st of that month, in local time. */
 export function monthToDate(month: string) {
   const [year, monthNumber] = month.split('-').map(Number)
   return new Date(year, monthNumber - 1, 1)
@@ -50,7 +47,6 @@ export function daysInMonth(month: string) {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
 }
 
-/** First and last day of a month, as the API's date filters expect them. */
 export function monthBounds(month: string) {
   return { date_from: `${month}-01`, date_to: `${month}-${daysInMonth(month)}` }
 }
