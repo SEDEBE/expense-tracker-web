@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { API, server } from '@/test/server'
 import { renderApp } from '@/test/renderApp'
 
@@ -69,5 +69,36 @@ describe('expenses page', () => {
     expect(query?.get('uncategorized')).toBe('true')
     expect(query?.get('date_from')).toBe('2026-09-01')
     expect(query?.get('date_to')).toBe('2026-09-30')
+  })
+
+  it('downloads the filtered expenses as CSV', async () => {
+    let asked: URLSearchParams | undefined
+    server.use(
+      http.get(`${API}/expenses/export/`, ({ request }) => {
+        asked = new URL(request.url).searchParams
+        return new HttpResponse('\ufeffFecha;Descripción;Categoría;Importe\r\n', {
+          headers: { 'Content-Type': 'text/csv', 'Content-Disposition': 'attachment; filename="gastos-2026-10-23.csv"' },
+        })
+      }),
+    )
+    // jsdom has no object URLs and does not follow downloads: watch the link instead.
+    URL.createObjectURL = vi.fn(() => 'blob:gastos')
+    URL.revokeObjectURL = vi.fn()
+    let downloaded = ''
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      downloaded = this.download
+    })
+    const { user } = renderApp('/gastos?categoria=2&orden=amount&pagina=2')
+
+    const button = await screen.findByRole('button', { name: 'Exportar CSV' })
+    await waitFor(() => expect(button).toBeEnabled())
+    await user.click(button)
+
+    await waitFor(() => expect(downloaded).toBe('gastos-2026-10-23.csv'))
+    expect(asked?.get('category')).toBe('2')
+    expect(asked?.get('ordering')).toBe('amount')
+    expect(asked?.get('date_from')).toMatch(/^\d{4}-\d{2}-01$/)
+    expect(asked?.has('page')).toBe(false)
+    click.mockRestore()
   })
 })

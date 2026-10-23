@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import { api, apiDownload } from '@/lib/api'
 import type { Expense, ExpenseInput, MonthlySummary, MonthTotal, Page } from '@/lib/types'
 
 export interface ExpenseFilters {
@@ -19,6 +19,7 @@ export const expensesApi = {
   remove: (id: number) => api<void>(`/expenses/${id}/`, { method: 'DELETE' }),
   summary: (month: string) => api<MonthlySummary>('/expenses/summary/', { query: { month } }),
   history: (months: number) => api<MonthTotal[]>('/expenses/history/', { query: { months } }),
+  exportCsv: ({ page: _page, ...filters }: ExpenseFilters) => apiDownload('/expenses/export/', { ...filters }),
   emailSummary: (month: string) =>
     api<{ detail: string }>('/expenses/summary/email/', { method: 'POST', body: { month } }),
 }
@@ -69,4 +70,9 @@ export function useDeleteExpense() {
 /** Ask the API to email the signed-in user the summary of a month, now. */
 export function useEmailSummary() {
   return useMutation({ mutationFn: expensesApi.emailSummary })
+}
+
+/** Download the expenses that match the filters (all pages) as a CSV file. */
+export function useExportExpenses() {
+  return useMutation({ mutationFn: expensesApi.exportCsv })
 }
