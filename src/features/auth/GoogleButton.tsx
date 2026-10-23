@@ -79,5 +79,7 @@ function RenderedButton({
     }
   }, [clientId, text])
 
-  return <div ref={container} className="flex min-h-10 justify-center" />
+  // Google draws the button in an iframe. With the page in dark mode the browser would paint
+  // that iframe with an opaque white background; a light color-scheme here keeps it transparent.
+  return <div ref={container} className="flex min-h-10 justify-center" style={{ colorScheme: 'light' }} />
 }
