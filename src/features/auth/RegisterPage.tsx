@@ -50,11 +50,7 @@ export function RegisterPage() {
       <h2 className="text-2xl font-semibold">Crear cuenta</h2>
       <p className="mt-1 text-sm text-muted">Solo necesitas un email y una contraseña.</p>
 
-      <div className="mt-8">
-        <GoogleButton text="signup_with" onCredential={(credential) => google.mutate(credential)} />
-      </div>
-
-      <form className="mt-4 space-y-4" onSubmit={onSubmit} noValidate>
+      <form className="mt-8 space-y-4" onSubmit={onSubmit} noValidate>
         {google.error && <Alert>{google.error.message}</Alert>}
         {registration.error && !fieldErrorsFromApi && <Alert>{registration.error.message}</Alert>}
         <Field label="Nombre (opcional)" error={errors.first_name?.message}>
@@ -72,6 +68,10 @@ export function RegisterPage() {
           Crear cuenta
         </Button>
       </form>
+
+      <div className="mt-3">
+        <GoogleButton text="signup_with" onCredential={(credential) => google.mutate(credential)} />
+      </div>
 
       <p className="mt-6 text-center text-sm text-muted">
         ¿Ya tienes cuenta?{' '}

@@ -50,9 +50,7 @@ export function LoginPage() {
         <span className="h-px flex-1 bg-border" />
       </div>
 
-      <GoogleButton onCredential={(credential) => google.mutate(credential)} />
-
-      <form className="mt-4 space-y-4" onSubmit={handleSubmit((values) => login.mutate(values))} noValidate>
+      <form className="space-y-4" onSubmit={handleSubmit((values) => login.mutate(values))} noValidate>
         {error && <Alert>{error.message}</Alert>}
         <Field label="Email" error={errors.email?.message}>
           {(props) => <Input type="email" autoComplete="email" {...props} {...register('email')} />}
@@ -66,6 +64,10 @@ export function LoginPage() {
           Entrar
         </Button>
       </form>
+
+      <div className="mt-3">
+        <GoogleButton onCredential={(credential) => google.mutate(credential)} />
+      </div>
 
       <p className="mt-6 text-center text-sm text-muted">
         ¿No tienes cuenta?{' '}
