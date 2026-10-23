@@ -3,7 +3,6 @@ import type { Tokens } from './types'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api/v1'
 
-/** An HTTP error from the API, with DRF's error body (`{"field": ["message"]}` or `{"detail": ...}`). */
 export class ApiError extends Error {
   status: number
   data: unknown
@@ -14,7 +13,6 @@ export class ApiError extends Error {
     this.data = data
   }
 
-  /** Errors per field, as DRF returns them for a 400. */
   get fieldErrors(): Record<string, string> {
     if (!this.data || typeof this.data !== 'object') return {}
     const errors: Record<string, string> = {}
@@ -41,7 +39,6 @@ interface RequestOptions {
   method?: string
   body?: unknown
   query?: Query
-  /** Send the access token and renew it on a 401. False for login and register. */
   auth?: boolean
 }
 

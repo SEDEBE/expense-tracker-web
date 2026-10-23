@@ -31,7 +31,6 @@ export function useMe() {
   return useQuery({ queryKey: ['me'], queryFn: authApi.me, enabled: loggedIn })
 }
 
-/** Stores the tokens, forgets any data cached for a previous user and opens the dashboard. */
 function useStartSession() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()

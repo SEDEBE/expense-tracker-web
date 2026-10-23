@@ -29,7 +29,6 @@ export function RegisterPage() {
   const onSubmit = handleSubmit((values) =>
     registration.mutate(values, {
       onError: (error) => {
-        // Show the API's validation messages (already in Spanish) next to each field.
         if (error instanceof ApiError) {
           for (const field of fields) {
             const message = error.fieldErrors[field]
@@ -40,15 +39,14 @@ export function RegisterPage() {
     }),
   )
 
-  // Field errors are shown under each field; anything else goes in the alert at the top.
   const apiError = registration.error
   const fieldErrorsFromApi =
     apiError instanceof ApiError && fields.some((field) => field in apiError.fieldErrors)
 
   return (
     <AuthLayout>
-      <h2 className="text-2xl font-bold">Crea tu cuenta</h2>
-      <p className="mt-1 text-sm text-muted">Empieza a registrar tus gastos en un minuto.</p>
+      <h2 className="text-2xl font-semibold">Crear cuenta</h2>
+      <p className="mt-1 text-sm text-muted">Solo necesitas un email y una contraseña.</p>
 
       <form className="mt-8 space-y-4" onSubmit={onSubmit} noValidate>
         {registration.error && !fieldErrorsFromApi && <Alert>{registration.error.message}</Alert>}

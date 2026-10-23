@@ -1,24 +1,23 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/inter';
+@import '@fontsource-variable/ibm-plex-sans';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 
-/* Dark mode follows the OS setting. */
 @custom-variant dark (@media (prefers-color-scheme: dark));
 
-/*
- * Design tokens. Components use these names (bg-surface, text-muted, bg-accent...) instead of
- * raw colors, so light and dark mode are defined once, here.
- */
+/* Ledger look: cool grey paper, blue ink, amounts in a monospaced face. */
 :root {
   color-scheme: light;
   --c-page: #f6f7f9;
   --c-surface: #ffffff;
-  --c-surface-2: #f1f3f6;
-  --c-border: #e3e6eb;
+  --c-surface-2: #eef1f5;
+  --c-border: #e1e5eb;
   --c-text: #0f1729;
   --c-muted: #5b6474;
   --c-accent: #2a78d6;
   --c-accent-strong: #1c5cab;
   --c-accent-soft: #e6f0fc;
+  --c-on-accent: #ffffff;
   --c-danger: #c53030;
   --c-danger-soft: #fdecec;
   --c-chart: #2a78d6;
@@ -37,15 +36,17 @@
     --c-accent: #3987e5;
     --c-accent-strong: #6da7ec;
     --c-accent-soft: #15263d;
+    --c-on-accent: #ffffff;
     --c-danger: #f07171;
     --c-danger-soft: #3a1d1d;
     --c-chart: #3987e5;
-    --c-chart-muted: #1c5cab;
+    --c-chart-muted: #24466f;
   }
 }
 
 @theme inline {
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   --color-page: var(--c-page);
   --color-surface: var(--c-surface);
   --color-surface-2: var(--c-surface-2);
@@ -55,6 +56,7 @@
   --color-accent: var(--c-accent);
   --color-accent-strong: var(--c-accent-strong);
   --color-accent-soft: var(--c-accent-soft);
+  --color-on-accent: var(--c-on-accent);
   --color-danger: var(--c-danger);
   --color-danger-soft: var(--c-danger-soft);
   --color-chart: var(--c-chart);
@@ -65,9 +67,27 @@
   body {
     @apply bg-page text-text font-sans antialiased;
   }
+  h1,
+  h2 {
+    text-wrap: balance;
+  }
+}
+
+/* Money: monospaced, tabular digits so amounts line up in columns. */
+@utility amount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 @utility tabular {
-  /* Tabular figures keep amounts aligned in lists and tables. */
   font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+  }
 }

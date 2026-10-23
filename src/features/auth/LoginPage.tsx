@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Sparkles } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router'
 import { z } from 'zod'
@@ -27,9 +26,9 @@ export function LoginPage() {
 
   return (
     <AuthLayout>
-      <h2 className="text-2xl font-bold">Bienvenido</h2>
+      <h2 className="text-2xl font-semibold">Entrar</h2>
       <p className="mt-1 text-sm text-muted">
-        Prueba la aplicación con datos de ejemplo, sin registrarte.
+        ¿Solo quieres echar un vistazo? Entra con una cuenta de prueba.
       </p>
 
       <Button
@@ -38,11 +37,10 @@ export function LoginPage() {
         onClick={() => demo.mutate()}
         loading={demo.isPending}
       >
-        <Sparkles className="size-5" aria-hidden />
         Entrar como demo
       </Button>
       <p className="mt-2 text-center text-xs text-muted">
-        Se crea una cuenta solo para ti, con 6 meses de gastos. Se borra en 24 horas.
+        Cuenta solo para ti, con 6 meses de gastos de ejemplo. Se borra a las 24 horas.
       </p>
 
       <div className="my-8 flex items-center gap-3 text-xs text-muted">

@@ -1,4 +1,4 @@
-import { FlaskConical, LayoutDashboard, LogOut, ReceiptText, Tags, Wallet } from 'lucide-react'
+import { LayoutDashboard, LogOut, ReceiptText, Tags, Wallet } from 'lucide-react'
 import { Navigate, NavLink, Outlet } from 'react-router'
 import { cx } from '@/lib/cx'
 import { useLogout, useMe } from '@/features/auth/api'
@@ -10,7 +10,6 @@ const links = [
   { to: '/categorias', label: 'Categorías', icon: Tags, end: false },
 ]
 
-/** Layout of every logged-in page. Without a session it sends you to the login page. */
 export function AppLayout() {
   const loggedIn = useIsLoggedIn()
   const { data: user } = useMe()
@@ -21,15 +20,14 @@ export function AppLayout() {
   return (
     <div className="flex min-h-dvh flex-col">
       {user?.is_demo && (
-        <div className="bg-accent-soft text-accent-strong">
-          <p className="mx-auto flex max-w-6xl items-center justify-center gap-2 px-4 py-2 text-center text-sm">
-            <FlaskConical className="size-4 shrink-0" aria-hidden />
-            Estás en una cuenta demo: los datos son de ejemplo y se borrarán en 24 horas. Cámbialos sin miedo.
+        <div className="border-b border-border bg-accent-soft text-accent-strong">
+          <p className="mx-auto max-w-6xl px-4 py-2 text-sm">
+            Estás en una cuenta demo. Los datos son de ejemplo y se borran a las 24 horas, así que puedes tocar lo que quieras.
           </p>
         </div>
       )}
 
-      <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-border bg-surface">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
           <NavLink to="/" className="flex items-center gap-2 font-semibold text-accent">
             <Wallet className="size-6" aria-hidden />
@@ -44,8 +42,8 @@ export function AppLayout() {
                 end={end}
                 className={({ isActive }) =>
                   cx(
-                    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                    isActive ? 'bg-accent-soft text-accent-strong' : 'text-muted hover:bg-surface-2 hover:text-text',
+                    'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    isActive ? 'bg-surface-2 text-text' : 'text-muted hover:text-text',
                   )
                 }
               >
@@ -63,7 +61,7 @@ export function AppLayout() {
             <button
               type="button"
               onClick={logout}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:bg-surface-2 hover:text-text"
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted hover:text-text"
             >
               <LogOut className="size-4" aria-hidden />
               <span className="hidden sm:inline">Salir</span>
@@ -78,7 +76,7 @@ export function AppLayout() {
       </main>
 
       <footer className="border-t border-border py-6 text-center text-sm text-muted">
-        Hecho por Alejandro Córdoba con React y Django · Código en GitHub:{' '}
+        Alejandro Córdoba · React y Django · código en GitHub:{' '}
         <a className="text-accent hover:underline" href="https://github.com/SEDEBE/expense-tracker-web" target="_blank" rel="noreferrer">
           web
         </a>{' '}
