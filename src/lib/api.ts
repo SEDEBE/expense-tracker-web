@@ -87,7 +87,8 @@ function refreshAccessToken(): Promise<string | null> {
   return refreshing
 }
 
-export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
+/** Sends a request with the session's token, refreshing it once if it has expired. */
+async function authorized(path: string, options: RequestOptions): Promise<Response> {
   const auth = options.auth ?? true
   let response = await send(path, options, auth ? session.get()?.access : undefined)
 
@@ -100,9 +101,30 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
     }
     response = await send(path, options, access)
   }
+  return response
+}
 
+export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const response = await authorized(path, options)
   if (response.status === 204) return undefined as T
   const data: unknown = await response.json().catch(() => null)
   if (!response.ok) throw new ApiError(response.status, data)
   return data as T
+}
+
+/**
+ * Downloads a file from the API. A plain link can't carry the token, so the file is fetched like
+ * any other request and handed to the browser as a temporary object URL.
+ */
+export async function apiDownload(path: string, query?: Query): Promise<void> {
+  const response = await authorized(path, { query })
+  if (!response.ok) throw new ApiError(response.status, await response.json().catch(() => null))
+  const disposition = response.headers.get('Content-Disposition') ?? ''
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? 'descarga'
+  const url = URL.createObjectURL(await response.blob())
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
 }

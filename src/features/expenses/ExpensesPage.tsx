@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { MonthPicker } from '@/components/MonthPicker'
@@ -7,7 +7,7 @@ import { useCategories } from '@/features/categories/api'
 import { formatMoney, formatMonth, monthBounds, toMonth } from '@/lib/format'
 import type { Expense } from '@/lib/types'
 import { useToday } from '@/lib/useToday'
-import { type ExpenseFilters, useExpenses, useMonthlySummary } from './api'
+import { type ExpenseFilters, useExpenses, useExportExpenses, useMonthlySummary } from './api'
 import { ExpenseFormModal } from './ExpenseFormModal'
 import { ExpenseTable } from './ExpenseTable'
 
@@ -47,6 +47,7 @@ export default function ExpensesPage() {
   const expenses = useExpenses(filters)
   const summary = useMonthlySummary(month)
   const [editing, setEditing] = useState<Expense | 'new' | null>(null)
+  const exportCsv = useExportExpenses()
 
   // The total of what the filter shows comes from the monthly summary, computed by the API.
   const categoryRow = summary.data?.by_category.find((row) =>
@@ -67,11 +68,27 @@ export default function ExpensesPage() {
               : 'Cargando…'}
           </p>
         </div>
-        <Button onClick={() => setEditing('new')}>
-          <Plus className="size-4" aria-hidden />
-          Nuevo gasto
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="secondary"
+            onClick={() => exportCsv.mutate(filters)}
+            loading={exportCsv.isPending}
+            disabled={count === 0}
+          >
+            {!exportCsv.isPending && <Download className="size-4" aria-hidden />}
+            Exportar CSV
+          </Button>
+          <Button onClick={() => setEditing('new')}>
+            <Plus className="size-4" aria-hidden />
+            Nuevo gasto
+          </Button>
+        </div>
       </div>
+      {exportCsv.isError && (
+        <p role="alert" className="-mt-2 text-sm text-negative">
+          No se ha podido exportar. {exportCsv.error.message}
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <MonthPicker value={month} onChange={(value) => update({ mes: value })} />
