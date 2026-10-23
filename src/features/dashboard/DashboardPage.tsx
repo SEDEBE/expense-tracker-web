@@ -10,6 +10,7 @@ import { ExpenseTable } from '@/features/expenses/ExpenseTable'
 import { daysInMonth, formatMoney, formatMonth, monthBounds, shiftMonth, toMonth } from '@/lib/format'
 import type { Expense } from '@/lib/types'
 import { useToday } from '@/lib/useToday'
+import { BudgetsCard } from './BudgetsCard'
 import { CategoryBreakdown, CategoryLegend } from './CategoryBreakdown'
 import { findingFor, monthName } from './finding'
 import { HistoryChart } from './HistoryChart'
@@ -100,15 +101,18 @@ export default function DashboardPage() {
           ) : null}
         </Card>
 
-        <Card className="flex flex-col lg:col-span-5" title="Últimos 6 meses">
-          {history.data ? (
-            <HistoryChart data={history.data} selected={month} onSelect={setMonth} />
-          ) : (
-            <div className="px-5 py-4">
-              <Skeleton className="h-48 w-full" />
-            </div>
-          )}
-        </Card>
+        <div className="flex flex-col gap-4 lg:col-span-5">
+          <Card className="flex flex-col" title="Últimos 6 meses">
+            {history.data ? (
+              <HistoryChart data={history.data} selected={month} onSelect={setMonth} />
+            ) : (
+              <div className="px-5 py-4">
+                <Skeleton className="h-48 w-full" />
+              </div>
+            )}
+          </Card>
+          {categories.length > 0 && <BudgetsCard categories={categories} summary={summary.data} inProgress={inProgress} />}
+        </div>
       </div>
 
       <Card

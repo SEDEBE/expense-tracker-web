@@ -12,11 +12,13 @@ async function listAll(): Promise<Category[]> {
   }
 }
 
+export type CategoryChanges = Partial<Pick<Category, 'name' | 'monthly_budget'>>
+
 export const categoriesApi = {
   listAll,
   create: (name: string) => api<Category>('/categories/', { method: 'POST', body: { name } }),
-  rename: (id: number, name: string) =>
-    api<Category>(`/categories/${id}/`, { method: 'PATCH', body: { name } }),
+  update: (id: number, changes: CategoryChanges) =>
+    api<Category>(`/categories/${id}/`, { method: 'PATCH', body: changes }),
   remove: (id: number) => api<void>(`/categories/${id}/`, { method: 'DELETE' }),
 }
 
@@ -39,10 +41,10 @@ export function useCreateCategory() {
   return useMutation({ mutationFn: categoriesApi.create, onSuccess: invalidate })
 }
 
-export function useRenameCategory() {
+export function useUpdateCategory() {
   const invalidate = useInvalidateAfterCategoryChange()
   return useMutation({
-    mutationFn: ({ id, name }: { id: number; name: string }) => categoriesApi.rename(id, name),
+    mutationFn: ({ id, changes }: { id: number; changes: CategoryChanges }) => categoriesApi.update(id, changes),
     onSuccess: invalidate,
   })
 }

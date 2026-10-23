@@ -15,8 +15,9 @@ export const demoUser: User = {
 }
 
 export const categories: Category[] = [
-  { id: 1, name: 'Supermercado', created_at: '2026-10-01T00:00:00Z' },
-  { id: 2, name: 'Vivienda', created_at: '2026-10-01T00:00:00Z' },
+  { id: 1, name: 'Supermercado', monthly_budget: '300.00', created_at: '2026-10-01T00:00:00Z' },
+  { id: 2, name: 'Vivienda', monthly_budget: '600.00', created_at: '2026-10-01T00:00:00Z' },
+  { id: 3, name: 'Ocio', monthly_budget: null, created_at: '2026-10-01T00:00:00Z' },
 ]
 
 export const expenses: Expense[] = [

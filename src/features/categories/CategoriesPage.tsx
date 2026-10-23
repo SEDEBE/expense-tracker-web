@@ -3,10 +3,11 @@ import { type FormEvent, useState } from 'react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Alert, Button, Card, EmptyState, Input, Skeleton } from '@/components/ui'
 import { useMonthlySummary } from '@/features/expenses/api'
+import { optionalAmountSchema } from '@/lib/amount'
 import { formatMoney, formatMonth, toMonth } from '@/lib/format'
 import type { Category, CategoryTotal } from '@/lib/types'
 import { useToday } from '@/lib/useToday'
-import { useCategories, useCreateCategory, useDeleteCategory, useRenameCategory } from './api'
+import { type CategoryChanges, useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from './api'
 
 export default function CategoriesPage() {
   const month = toMonth(useToday())
@@ -113,57 +114,93 @@ interface CategoryItemProps {
 }
 
 function CategoryItem({ category, total, first, onDelete }: CategoryItemProps) {
-  const rename = useRenameCategory()
+  const update = useUpdateCategory()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(category.name)
+  const [budget, setBudget] = useState(toInput(category.monthly_budget))
+  const [budgetError, setBudgetError] = useState<string | null>(null)
   const rowClass = `min-h-12 items-center gap-x-4 px-5 ${first ? '' : 'border-t border-rule'}`
+
+  const stopEditing = () => {
+    setName(category.name)
+    setBudget(toInput(category.monthly_budget))
+    setBudgetError(null)
+    update.reset()
+    setEditing(false)
+  }
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault()
-    if (!name.trim() || name.trim() === category.name) return setEditing(false)
-    rename.mutate({ id: category.id, name: name.trim() }, { onSuccess: () => setEditing(false) })
+    const parsed = optionalAmountSchema.safeParse(budget)
+    if (!parsed.success) return setBudgetError(parsed.error.issues[0].message)
+    setBudgetError(null)
+    // Send only what changed, so an untouched field never overwrites a newer value.
+    const changes: CategoryChanges = {}
+    if (name.trim() && name.trim() !== category.name) changes.name = name.trim()
+    if (Number(parsed.data ?? 0) !== Number(category.monthly_budget ?? 0)) changes.monthly_budget = parsed.data
+    if (Object.keys(changes).length === 0) return setEditing(false)
+    update.mutate({ id: category.id, changes }, { onSuccess: () => setEditing(false) })
   }
 
   if (editing) {
     return (
-      <li className={`${rowClass} flex flex-wrap py-2`}>
-        <form onSubmit={onSubmit} className="flex flex-1 items-center gap-2">
-          <Input
-            aria-label={`Nuevo nombre de ${category.name}`}
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            maxLength={50}
-            autoFocus
-          />
-          <Button type="submit" size="sm" className="px-2" loading={rename.isPending} aria-label="Guardar">
-            <Check className="size-4" aria-hidden />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="px-2"
-            aria-label="Cancelar"
-            onClick={() => {
-              setName(category.name)
-              setEditing(false)
-              rename.reset()
-            }}
-          >
-            <X className="size-4" aria-hidden />
-          </Button>
+      <li className={`${rowClass} py-3`}>
+        <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-2">
+          <label className="min-w-40 flex-[2] space-y-1 text-xs text-muted">
+            <span>Nombre</span>
+            <Input
+              aria-label={`Nuevo nombre de ${category.name}`}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              maxLength={50}
+              autoFocus
+            />
+          </label>
+          <label className="min-w-32 flex-1 space-y-1 text-xs text-muted">
+            <span>Límite al mes (€)</span>
+            <Input
+              aria-label={`Presupuesto mensual de ${category.name}`}
+              aria-invalid={Boolean(budgetError)}
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder="Sin límite"
+              value={budget}
+              onChange={(event) => setBudget(event.target.value)}
+            />
+          </label>
+          <div className="flex gap-1">
+            <Button type="submit" size="md" className="px-2.5" loading={update.isPending} aria-label="Guardar">
+              <Check className="size-4" aria-hidden />
+            </Button>
+            <Button variant="ghost" size="md" className="px-2.5" aria-label="Cancelar" onClick={stopEditing}>
+              <X className="size-4" aria-hidden />
+            </Button>
+          </div>
         </form>
-        {rename.error && <p className="w-full text-sm text-negative">{rename.error.message}</p>}
+        {(budgetError || update.error) && (
+          <p className="mt-2 text-sm text-negative">{budgetError ?? update.error?.message}</p>
+        )}
       </li>
     )
   }
 
+  const limit = category.monthly_budget === null ? null : Number(category.monthly_budget)
+  const over = limit !== null && Number(total?.total ?? 0) > limit
   return (
-    <li className={`${rowClass} grid ${columns}`}>
-      <span className="min-w-0 truncate">{category.name}</span>
+    <li className={`${rowClass} grid py-2 ${columns}`}>
+      <span className="min-w-0">
+        <span className="block truncate">{category.name}</span>
+        {limit !== null && (
+          <span className={`num block text-xs ${over ? 'text-negative' : 'text-muted'}`}>
+            Límite {formatMoney(limit)}
+            {over ? ' · superado' : ''}
+          </span>
+        )}
+      </span>
       <span className="num hidden text-right text-muted sm:block">{total?.count ?? 0}</span>
       <span className={`num text-right ${total ? 'font-medium' : 'text-muted'}`}>{formatMoney(total?.total ?? 0)}</span>
       <span className="flex justify-end gap-0.5">
-        <Button variant="ghost" size="sm" className="px-2" onClick={() => setEditing(true)} aria-label={`Renombrar ${category.name}`}>
+        <Button variant="ghost" size="sm" className="px-2" onClick={() => setEditing(true)} aria-label={`Editar ${category.name}`}>
           <Pencil className="size-4" strokeWidth={1.5} aria-hidden />
         </Button>
         <Button
@@ -178,4 +215,9 @@ function CategoryItem({ category, total, first, onDelete }: CategoryItemProps) {
       </span>
     </li>
   )
+}
+
+/** "150.00" from the API becomes "150" or "150,5" in the field; no budget, an empty field. */
+function toInput(budget: string | null) {
+  return budget === null ? '' : String(Number(budget)).replace('.', ',')
 }
