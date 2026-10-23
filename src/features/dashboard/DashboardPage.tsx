@@ -1,10 +1,10 @@
-import { Plus } from 'lucide-react'
+import { Mail, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { MonthPicker } from '@/components/MonthPicker'
 import { Button, Card, EmptyState, Skeleton } from '@/components/ui'
 import { useCategories } from '@/features/categories/api'
-import { useExpenses, useHistory, useMonthlySummary } from '@/features/expenses/api'
+import { useEmailSummary, useExpenses, useHistory, useMonthlySummary } from '@/features/expenses/api'
 import { ExpenseFormModal } from '@/features/expenses/ExpenseFormModal'
 import { ExpenseTable } from '@/features/expenses/ExpenseTable'
 import { daysInMonth, formatMoney, formatMonth, monthBounds, shiftMonth, toMonth } from '@/lib/format'
@@ -29,6 +29,9 @@ export default function DashboardPage() {
   const previous = useMonthlySummary(shiftMonth(month, -1))
   const history = useHistory(6)
   const recent = useExpenses({ ...monthBounds(month), ordering: '-date' })
+  const emailSummary = useEmailSummary()
+  // The answer belongs to the month it was asked for; after changing month it no longer applies.
+  const emailResult = emailSummary.variables === month ? emailSummary : null
 
   const days = inProgress ? today.getDate() : daysInMonth(month)
   const count = summary.data?.by_category.reduce((sum, row) => sum + row.count, 0) ?? 0
@@ -45,12 +48,25 @@ export default function DashboardPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MonthPicker value={month} onChange={setMonth} />
+          <Button
+            variant="secondary"
+            onClick={() => emailSummary.mutate(month)}
+            loading={emailResult?.isPending}
+            disabled={!summary.data?.by_category.length}
+          >
+            {!emailResult?.isPending && <Mail className="size-4" aria-hidden />}
+            Enviar por email
+          </Button>
           <Button onClick={() => setEditing('new')}>
             <Plus className="size-4" aria-hidden />
             Añadir gasto
           </Button>
         </div>
       </div>
+      <p role="status" className="-mt-2 text-sm empty:hidden">
+        {emailResult?.isSuccess && <span className="text-muted">{emailResult.data.detail}</span>}
+        {emailResult?.isError && <span className="text-negative">{emailResult.error.message}</span>}
+      </p>
 
       <div className="grid gap-4 lg:grid-cols-12">
         <Card
