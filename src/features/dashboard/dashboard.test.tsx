@@ -1,6 +1,9 @@
 import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { renderApp } from '@/test/renderApp'
+import { API, server } from '@/test/server'
 
 describe('dashboard', () => {
   it('shows the month total and the breakdown by category', async () => {
@@ -28,5 +31,40 @@ describe('dashboard', () => {
 
     expect(await screen.findByText('Alquiler')).toBeInTheDocument()
     expect(screen.getByText('Mercadona')).toBeInTheDocument()
+  })
+
+  it('emails the summary of the month on request', async () => {
+    const user = userEvent.setup()
+    let asked: unknown
+    server.use(
+      http.post(`${API}/expenses/summary/email/`, async ({ request }) => {
+        asked = await request.json()
+        return HttpResponse.json({ detail: 'Te estamos enviando el resumen a ana@example.com.' }, { status: 202 })
+      }),
+    )
+    renderApp('/?mes=2026-09')
+
+    const button = await screen.findByRole('button', { name: 'Enviar por email' })
+    await waitFor(() => expect(button).toBeEnabled())
+    await user.click(button)
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Te estamos enviando el resumen a ana@example.com.')
+    expect(asked).toEqual({ month: '2026-09' })
+  })
+
+  it('shows why the summary could not be sent', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.post(`${API}/expenses/summary/email/`, () =>
+        HttpResponse.json({ detail: 'Las cuentas demo tienen un email inventado.' }, { status: 403 }),
+      ),
+    )
+    renderApp('/')
+
+    const button = await screen.findByRole('button', { name: 'Enviar por email' })
+    await waitFor(() => expect(button).toBeEnabled())
+    await user.click(button)
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Las cuentas demo tienen un email inventado.')
   })
 })

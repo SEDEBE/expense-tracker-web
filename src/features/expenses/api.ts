@@ -19,6 +19,8 @@ export const expensesApi = {
   remove: (id: number) => api<void>(`/expenses/${id}/`, { method: 'DELETE' }),
   summary: (month: string) => api<MonthlySummary>('/expenses/summary/', { query: { month } }),
   history: (months: number) => api<MonthTotal[]>('/expenses/history/', { query: { months } }),
+  emailSummary: (month: string) =>
+    api<{ detail: string }>('/expenses/summary/email/', { method: 'POST', body: { month } }),
 }
 
 export function useExpenses(filters: ExpenseFilters) {
@@ -62,4 +64,9 @@ export function useSaveExpense() {
 export function useDeleteExpense() {
   const invalidate = useInvalidateAfterExpenseChange()
   return useMutation({ mutationFn: expensesApi.remove, onSuccess: invalidate })
+}
+
+/** Ask the API to email the signed-in user the summary of a month, now. */
+export function useEmailSummary() {
+  return useMutation({ mutationFn: expensesApi.emailSummary })
 }

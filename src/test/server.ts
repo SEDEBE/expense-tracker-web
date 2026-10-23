@@ -65,6 +65,9 @@ export const handlers = [
     }
     return HttpResponse.json(summary)
   }),
+  http.post(`${API}/expenses/summary/email/`, () =>
+    HttpResponse.json({ detail: 'Te estamos enviando el resumen a demo-abc@demo.invalid.' }, { status: 202 }),
+  ),
   http.get(`${API}/expenses/history/`, () => {
     const history: MonthTotal[] = [
       { month: '2026-09', total: '1200.00' },
