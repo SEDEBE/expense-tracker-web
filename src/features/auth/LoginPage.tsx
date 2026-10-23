@@ -60,6 +60,11 @@ export function LoginPage() {
             <PasswordInput autoComplete="current-password" {...props} {...register('password')} />
           )}
         </Field>
+        <p className="-mt-2 text-right text-sm">
+          <Link to="/recuperar" className="text-muted underline-offset-2 hover:text-text hover:underline">
+            ¿Has olvidado tu contraseña?
+          </Link>
+        </p>
         <Button type="submit" variant="secondary" className="w-full" loading={login.isPending}>
           Entrar
         </Button>

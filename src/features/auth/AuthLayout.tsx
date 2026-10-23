@@ -13,7 +13,7 @@ const sample = [
 export function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1fr_1.1fr]">
-      <aside className="hidden flex-col justify-between border-r border-border bg-raised p-12 lg:flex">
+      <aside className="hidden flex-col justify-between border-r border-border p-12 lg:flex">
         <div className="flex items-center gap-2.5 text-[15px] font-medium">
           <Mark />
           Gastos

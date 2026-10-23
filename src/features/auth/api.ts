@@ -26,6 +26,10 @@ export const authApi = {
   google: (credential: string) =>
     api<Tokens>('/auth/google/', { method: 'POST', body: { credential }, auth: false }),
   me: () => api<User>('/auth/me/'),
+  passwordReset: (email: string) =>
+    api<{ detail: string }>('/auth/password-reset/', { method: 'POST', body: { email }, auth: false }),
+  passwordResetConfirm: (data: { uid: string; token: string; password: string }) =>
+    api<void>('/auth/password-reset/confirm/', { method: 'POST', body: data, auth: false }),
 }
 
 export function useMe() {
