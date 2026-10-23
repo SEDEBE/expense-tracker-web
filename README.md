@@ -24,7 +24,14 @@ account with six months of sample data and opens its dashboard; it is deleted af
   category to see its expenses, or a column to open that month.
 - **Expenses**: filter by month and category, sort by date or amount, paginate; click a row to
   edit or delete it (deleting asks twice). Amounts accept a decimal comma (`12,50`).
-- **Categories**: create, rename and delete (their expenses become uncategorized).
+- **Categories**: create, rename and delete (their expenses become uncategorized), and give each
+  one an optional monthly limit.
+- **Budgets**: a dashboard card with spending against each limit, closest first, and what is left
+  or how much it went over. The API emails a warning at 80 % and 100 %.
+- **Recurring expenses** (*Gastos fijos*): rent, subscriptions and other fixed costs, created on
+  their day each month by the API; they can be paused.
+- **Export and email**: download the filtered expenses as CSV (opens in columns in a Spanish
+  Excel), or get the month's summary by email from the dashboard.
 - **Auth**: register, log in, log out, "Continuar con Google", password reset by email and
   one-click demo accounts.
   Password fields can be shown while typing. JWT access tokens renew automatically with the
