@@ -24,8 +24,9 @@ with six months of sample data, deleted after 24 hours.
 - **Expenses**: filter by month and category, sort by date or amount, paginate, create, edit
   and delete (with confirmation). Amounts accept a decimal comma (`12,50`).
 - **Categories**: create, rename and delete (their expenses become uncategorized).
-- **Auth**: register, log in, log out and one-click demo accounts. JWT access tokens renew
-  automatically with the refresh token.
+- **Auth**: register, log in, log out, "Continuar con Google" and one-click demo accounts.
+  Password fields can be shown while typing. JWT access tokens renew automatically with the
+  refresh token.
 - Filters and the selected month live in the URL, so reloading or sharing a link keeps them.
 - Light and dark mode (follows the OS), responsive layout, accessible forms and charts
   (labels, keyboard support, a screen-reader table behind the chart).
@@ -79,6 +80,10 @@ http://localhost:8080, also against the API on `localhost:8000`.
   refresh shared by all the requests that failed at the same time; if the refresh fails too,
   the session ends and the app goes back to the login page. (An httpOnly cookie would protect
   the tokens from XSS better; it needs CSRF handling on the API and is a possible next step.)
+- **Google sign-in**: Google's own button (Google Identity Services) returns a signed ID token;
+  the app sends it to `POST /api/v1/auth/google/`, which verifies it and returns the usual JWT
+  pair. The button only appears when `VITE_GOOGLE_CLIENT_ID` is set (`.env.local` in
+  development, `.env.production` for builds); the client ID is public, not a secret.
 - **Errors in Spanish**: requests send `Accept-Language: es`, so the API's validation messages
   arrive translated and are shown next to each field.
 - **Tests render the whole app** with an in-memory router and MSW answering the API calls, and

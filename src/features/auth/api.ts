@@ -23,6 +23,8 @@ export const authApi = {
       auth: false,
     }),
   demo: () => api<Tokens>('/auth/demo/', { method: 'POST', auth: false }),
+  google: (credential: string) =>
+    api<Tokens>('/auth/google/', { method: 'POST', body: { credential }, auth: false }),
   me: () => api<User>('/auth/me/'),
 }
 
@@ -49,6 +51,11 @@ export function useLogin() {
 export function useDemoLogin() {
   const start = useStartSession()
   return useMutation({ mutationFn: authApi.demo, onSuccess: start })
+}
+
+export function useGoogleLogin() {
+  const start = useStartSession()
+  return useMutation({ mutationFn: authApi.google, onSuccess: start })
 }
 
 export function useRegister() {

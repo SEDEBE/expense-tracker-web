@@ -1,6 +1,6 @@
-import { LoaderCircle } from 'lucide-react'
+import { Eye, EyeOff, LoaderCircle } from 'lucide-react'
 import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from 'react'
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { cx } from '@/lib/cx'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
@@ -100,6 +100,25 @@ export function Field({ label, error, hint, children }: FieldProps) {
 // React 19 passes `ref` as a normal prop, so register() works without forwardRef.
 export function Input({ className, ...props }: ComponentProps<'input'>) {
   return <input className={cx(controlClasses, className)} {...props} />
+}
+
+export function PasswordInput({ className, ...props }: Omit<ComponentProps<'input'>, 'type'>) {
+  const [visible, setVisible] = useState(false)
+  const Icon = visible ? EyeOff : Eye
+  return (
+    <div className="relative">
+      <Input type={visible ? 'text' : 'password'} className={cx('pr-10', className)} {...props} />
+      <button
+        type="button"
+        onClick={() => setVisible((value) => !value)}
+        aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+        aria-pressed={visible}
+        className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-r-md text-muted hover:text-text"
+      >
+        <Icon className="size-4" aria-hidden />
+      </button>
+    </div>
+  )
 }
 
 export function Select({ className, ...props }: ComponentProps<'select'>) {

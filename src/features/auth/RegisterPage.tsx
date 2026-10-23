@@ -2,10 +2,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router'
 import { z } from 'zod'
-import { Alert, Button, Field, Input } from '@/components/ui'
+import { Alert, Button, Field, Input, PasswordInput } from '@/components/ui'
 import { ApiError } from '@/lib/api'
 import { AuthLayout } from './AuthLayout'
-import { useRegister } from './api'
+import { useGoogleLogin, useRegister } from './api'
+import { GoogleButton } from './GoogleButton'
 
 const schema = z.object({
   first_name: z.string().trim().max(150),
@@ -19,6 +20,7 @@ const fields = ['first_name', 'email', 'password'] as const
 
 export function RegisterPage() {
   const registration = useRegister()
+  const google = useGoogleLogin()
   const {
     register,
     handleSubmit,
@@ -48,7 +50,12 @@ export function RegisterPage() {
       <h2 className="text-2xl font-semibold">Crear cuenta</h2>
       <p className="mt-1 text-sm text-muted">Solo necesitas un email y una contraseña.</p>
 
-      <form className="mt-8 space-y-4" onSubmit={onSubmit} noValidate>
+      <div className="mt-8">
+        <GoogleButton text="signup_with" onCredential={(credential) => google.mutate(credential)} />
+      </div>
+
+      <form className="mt-4 space-y-4" onSubmit={onSubmit} noValidate>
+        {google.error && <Alert>{google.error.message}</Alert>}
         {registration.error && !fieldErrorsFromApi && <Alert>{registration.error.message}</Alert>}
         <Field label="Nombre (opcional)" error={errors.first_name?.message}>
           {(props) => <Input autoComplete="given-name" {...props} {...register('first_name')} />}
@@ -58,7 +65,7 @@ export function RegisterPage() {
         </Field>
         <Field label="Contraseña" error={errors.password?.message} hint="Mínimo 8 caracteres.">
           {(props) => (
-            <Input type="password" autoComplete="new-password" {...props} {...register('password')} />
+            <PasswordInput autoComplete="new-password" {...props} {...register('password')} />
           )}
         </Field>
         <Button type="submit" className="w-full" loading={registration.isPending}>
