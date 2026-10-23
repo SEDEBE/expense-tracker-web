@@ -7,22 +7,14 @@ import { Alert, Button, Field, Input, Select } from '@/components/ui'
 import { useCategories } from '@/features/categories/api'
 import { ApiError } from '@/lib/api'
 import { toIsoDate } from '@/lib/format'
+import { amountSchema } from '@/lib/amount'
 import type { Expense } from '@/lib/types'
 import { useToday } from '@/lib/useToday'
 import { useDeleteExpense, useSaveExpense } from './api'
 
 const schema = z.object({
   // Spanish keyboards type "12,50"; the API wants "12.50".
-  amount: z
-    .string()
-    .trim()
-    .transform((value) => value.replace(',', '.'))
-    .pipe(
-      z
-        .string()
-        .regex(/^\d+(\.\d{1,2})?$/, 'Introduce un importe como 12,50')
-        .refine((value) => Number(value) > 0, 'El importe debe ser mayor que 0'),
-    ),
+  amount: amountSchema,
   date: z.string().min(1, 'Elige una fecha'),
   description: z.string().trim().max(255, 'Máximo 255 caracteres'),
   category: z.string(),

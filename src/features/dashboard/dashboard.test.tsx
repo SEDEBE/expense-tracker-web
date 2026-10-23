@@ -67,4 +67,18 @@ describe('dashboard', () => {
 
     expect(await screen.findByRole('status')).toHaveTextContent('Las cuentas demo tienen un email inventado.')
   })
+
+  it('shows spending against each budget, the closest to its limit first', async () => {
+    renderApp('/')
+
+    const card = (await screen.findByRole('heading', { name: 'Presupuestos' })).closest('section')!
+    const meters = await within(card).findAllByRole('meter')
+    // Intl puts a non-breaking space before the euro sign.
+    expect(meters.map((meter) => meter.getAttribute('aria-label')?.replace(/\s/g, ' '))).toEqual([
+      'Vivienda: 650,00 € de 600,00 €',
+      'Supermercado: 42,30 € de 300,00 €',
+    ])
+    expect(card).toHaveTextContent('Te has pasado 50,00 €')
+    expect(card).toHaveTextContent('Quedan 257,70 €')
+  })
 })

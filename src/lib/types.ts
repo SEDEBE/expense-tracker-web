@@ -18,6 +18,8 @@ export interface Tokens {
 export interface Category {
   id: number
   name: string
+  /** Monthly spending limit, as the API sends decimals ("150.00"); null means no budget. */
+  monthly_budget: string | null
   created_at: string
 }
 
