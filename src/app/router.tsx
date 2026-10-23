@@ -13,6 +13,8 @@ const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage'))
 const ExpensesPage = lazy(() => import('@/features/expenses/ExpensesPage'))
 const CategoriesPage = lazy(() => import('@/features/categories/CategoriesPage'))
 const DemoStartPage = lazy(() => import('@/features/auth/DemoStartPage'))
+const ForgotPasswordPage = lazy(() => import('@/features/auth/ForgotPasswordPage'))
+const ResetPasswordPage = lazy(() => import('@/features/auth/ResetPasswordPage'))
 
 function Page({ children }: { children: ReactNode }) {
   return <Suspense fallback={<Spinner />}>{children}</Suspense>
@@ -26,6 +28,8 @@ export const routes: RouteObject[] = [
   { path: '/login', element: <GuestOnly><LoginPage /></GuestOnly> },
   { path: '/registro', element: <GuestOnly><RegisterPage /></GuestOnly> },
   { path: '/demo', element: <Page><DemoStartPage /></Page> },
+  { path: '/recuperar', element: <GuestOnly><Page><ForgotPasswordPage /></Page></GuestOnly> },
+  { path: '/restablecer', element: <GuestOnly><Page><ResetPasswordPage /></Page></GuestOnly> },
   {
     element: <AppLayout />,
     children: [

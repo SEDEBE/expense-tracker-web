@@ -25,7 +25,8 @@ account with six months of sample data and opens its dashboard; it is deleted af
 - **Expenses**: filter by month and category, sort by date or amount, paginate; click a row to
   edit or delete it (deleting asks twice). Amounts accept a decimal comma (`12,50`).
 - **Categories**: create, rename and delete (their expenses become uncategorized).
-- **Auth**: register, log in, log out, "Continuar con Google" and one-click demo accounts.
+- **Auth**: register, log in, log out, "Continuar con Google", password reset by email and
+  one-click demo accounts.
   Password fields can be shown while typing. JWT access tokens renew automatically with the
   refresh token.
 - Filters and the selected month live in the URL, so reloading or sharing a link keeps them.
