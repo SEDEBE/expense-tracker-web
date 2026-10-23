@@ -2,9 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router'
 import { z } from 'zod'
-import { Alert, Button, Field, Input } from '@/components/ui'
+import { Alert, Button, Field, Input, PasswordInput } from '@/components/ui'
 import { AuthLayout } from './AuthLayout'
-import { useDemoLogin, useLogin } from './api'
+import { useDemoLogin, useGoogleLogin, useLogin } from './api'
+import { GoogleButton } from './GoogleButton'
 
 const schema = z.object({
   email: z.email('Introduce un email válido'),
@@ -16,13 +17,14 @@ type FormValues = z.infer<typeof schema>
 export function LoginPage() {
   const login = useLogin()
   const demo = useDemoLogin()
+  const google = useGoogleLogin()
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
-  const error = login.error ?? demo.error
+  const error = login.error ?? demo.error ?? google.error
 
   return (
     <AuthLayout>
@@ -48,19 +50,16 @@ export function LoginPage() {
         <span className="h-px flex-1 bg-border" />
       </div>
 
-      <form className="space-y-4" onSubmit={handleSubmit((values) => login.mutate(values))} noValidate>
+      <GoogleButton onCredential={(credential) => google.mutate(credential)} />
+
+      <form className="mt-4 space-y-4" onSubmit={handleSubmit((values) => login.mutate(values))} noValidate>
         {error && <Alert>{error.message}</Alert>}
         <Field label="Email" error={errors.email?.message}>
           {(props) => <Input type="email" autoComplete="email" {...props} {...register('email')} />}
         </Field>
         <Field label="Contraseña" error={errors.password?.message}>
           {(props) => (
-            <Input
-              type="password"
-              autoComplete="current-password"
-              {...props}
-              {...register('password')}
-            />
+            <PasswordInput autoComplete="current-password" {...props} {...register('password')} />
           )}
         </Field>
         <Button type="submit" variant="secondary" className="w-full" loading={login.isPending}>

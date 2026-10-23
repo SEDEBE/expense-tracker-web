@@ -4,4 +4,6 @@ dist
 .github
 docs
 *.log
-.env*
+.env
+.env.local
+.env.*.local
