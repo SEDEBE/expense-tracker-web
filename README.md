@@ -8,21 +8,22 @@ React frontend for my [Expense Tracker API](https://github.com/SEDEBE/expense-tr
 REST Framework): record expenses by category, see where your money goes each month and how it
 changes over time. The interface is in Spanish.
 
-**Try it without signing up:** the "Entrar como demo" button creates a private demo account
-with six months of sample data, deleted after 24 hours.
+**Try it without signing up:** `/demo` (or the "Entrar como demo" button) creates a private demo
+account with six months of sample data and opens its dashboard; it is deleted after 24 hours.
 
 ![Dashboard](docs/dashboard.png)
 
-| Login with the demo button | Expenses with filters |
-|---|---|
-| ![Login](docs/login.png) | ![Expenses](docs/expenses.png) |
+| Login | Expenses with filters | Phone |
+|---|---|---|
+| ![Login](docs/login.png) | ![Expenses](docs/expenses.png) | ![Dashboard on a phone](docs/mobile.png) |
 
 ## Features
 
-- **Dashboard**: month total, daily average, top category, spending by category and a
-  six-month chart. Click a category to see its expenses, or a column to open that month.
-- **Expenses**: filter by month and category, sort by date or amount, paginate, create, edit
-  and delete (with confirmation). Amounts accept a decimal comma (`12,50`).
+- **Dashboard**: the month's total and its one finding ("Restaurantes ya supera todo
+  septiembre…"), each category against last month, and a six-month chart with the average. Click a
+  category to see its expenses, or a column to open that month.
+- **Expenses**: filter by month and category, sort by date or amount, paginate; click a row to
+  edit or delete it (deleting asks twice). Amounts accept a decimal comma (`12,50`).
 - **Categories**: create, rename and delete (their expenses become uncategorized).
 - **Auth**: register, log in, log out, "Continuar con Google" and one-click demo accounts.
   Password fields can be shown while typing. JWT access tokens renew automatically with the
@@ -35,11 +36,11 @@ with six months of sample data, deleted after 24 hours.
 
 | Area | Tools |
 |---|---|
-| UI | React 19, TypeScript (strict), Tailwind CSS 4, lucide icons |
+| UI | React 19, TypeScript (strict), Tailwind CSS 4, Geist, lucide icons |
 | Data | TanStack Query (server state, cache, invalidation), a small typed `fetch` client |
 | Routing | React Router (lazy-loaded pages) |
 | Forms | React Hook Form + Zod (one schema for validation and types) |
-| Charts | Recharts |
+| Charts | Hand-written SVG (no chart library) |
 | Tests | Vitest, Testing Library, MSW (mocked API) |
 | Quality | oxlint, `tsc` in CI |
 | DevOps | Docker (multi-stage build served by Nginx), GitHub Actions |
@@ -67,6 +68,13 @@ npm run build      # production build in dist/
 
 With Docker, `docker compose up --build` serves the production build on
 http://localhost:8080, also against the API on `localhost:8000`.
+
+## Design
+
+The visual system is documented in [DESIGN.md](DESIGN.md): an "achromatic ledger" where the
+interface has no colour of its own, money is set in tabular figures, and one blue marks the data
+the screen is about. Screens were checked at 1440, 768 and 390px with a real-browser inspector and
+against Vercel's Web Interface Guidelines.
 
 ## How it works
 
